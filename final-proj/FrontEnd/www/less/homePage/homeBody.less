@@ -1,0 +1,52 @@
+body{
+  background-color: crimson;
+  min-width: 500px;
+}
+
+#top-left, #top-right, #bottom-left, #bottom-right{
+  background-color: antiquewhite;
+  height: 35vh;
+  text-align: center;
+}
+
+@border-radius: 20px;
+
+#top-left, #top-right{
+  border-radius: @border-radius @border-radius 0px 0px;
+}
+
+#top-left, #bottom-left{
+  border-right: solid red;
+}
+
+#top-right, #bottom-right{
+  border-left: solid red;
+}
+
+#bottom-left, #bottom-right{
+  border-radius: 0px 0px @border-radius @border-radius;
+}
+
+#top{
+  margin-top: 80px;
+}
+
+#bottom{
+  margin-top: 3px;
+}
+
+#my-dels, #new-del, #mini-shop, #pay{
+  height: 35px;
+  width: 35px;
+  vertical-align: middle;
+  margin-top: 65px;
+}
+
+#new-del{
+  width: 50px;
+}
+
+.option{
+  vertical-align: middle;
+  font-size: 20px;
+}

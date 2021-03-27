@@ -1,29 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Universal Delivery</title>
+<%- include('common/header'); -%>
 
-    <!-- Bootsrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<div class="container">
+    <div class = "row" id = "top">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-6" id = "top-left">
+            <img src = './images/home.jpg' id = 'my-dels'>
+            <div class = "option">My Deliveries</div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-6" id = "top-right">
+            <img src = './images/postman.jpeg' id = 'new-del'>
+            <div class = "option">Create a New Delivery</div>
+        </div>
+    </div>
+    <div class="row" id = "bottom">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-6" id = "bottom-left">
+            <img src = './images/mi.png' id = 'mini-shop'>
+            <div class = "option">Buy something?</div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-6" id = "bottom-right">
+            <img src = './images/credit_card.png' id = 'pay'>
+            <div class = "option">Pay for Delivery</div>
+        </div>
+    </div>
+</div>
 
-    <!-- LESS основний файл -->
-    <link rel="stylesheet/less" type="text/css" href="less/main.less" />
-
-    <!-- LESS JavaScript компілятор -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js"></script>
-</head>
-<body>
-
-<button type="button" class="btn btn-primary">Primary</button>
-
-<!-- jQuery JavaScript -->
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"> </script>
-
-<!--Bootsrap JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-
-<!--Own JavaScript -->
-<script type="text/javascript"  src="js/main.js"> </script>
-</body>
-</html>
+<%- include('common/footer'); -%>
