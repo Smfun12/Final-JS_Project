@@ -30,3 +30,9 @@ exports.paymentPage = function(req, res) {
         pageTitle: 'Pay for Delivery'
     });
 };
+
+exports.signUpPage = function(req, res) {
+    res.render('signUpPage', {
+        pageTitle: 'Sign up'
+    });
+};

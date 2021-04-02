@@ -30,6 +30,9 @@ function configureEndpoints(app) {
     // Сторінка міні-маґазину
     app.get('/payment.html', pages.paymentPage);
 
+    // Сторінка реєстрації
+    app.get('/signup.html', pages.signUpPage);
+
     //Якщо не підійшов жоден url, тоді повертаємо файли з папки www
     app.use(express.static(path.join(__dirname, '../Frontend/www')));
 }
