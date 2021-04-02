@@ -18,6 +18,18 @@ function configureEndpoints(app) {
     //Головна сторінка
     app.get('/', pages.mainPage);
 
+    // Сторінка минулих замовленнів
+    app.get('/archive.html', pages.archivePage);
+
+    // Сторінка нового замовлення доставки
+    app.get('/order.html', pages.orderPage);
+
+    // Сторінка міні-маґазину
+    app.get('/shop.html', pages.shopPage);
+
+    // Сторінка міні-маґазину
+    app.get('/payment.html', pages.paymentPage);
+
     //Якщо не підійшов жоден url, тоді повертаємо файли з папки www
     app.use(express.static(path.join(__dirname, '../Frontend/www')));
 }
