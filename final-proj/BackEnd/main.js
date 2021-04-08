@@ -18,6 +18,8 @@ function configureEndpoints(app) {
     //Головна сторінка
     app.get('/', pages.mainPage);
 
+    app.post('/',api.checkUserInSystem);
+
     // Сторінка минулих замовленнів
     app.get('/archive.html', pages.archivePage);
 
@@ -32,6 +34,9 @@ function configureEndpoints(app) {
 
     // Сторінка реєстрації
     app.get('/signup.html', pages.signUpPage);
+
+    app.get('/login.html', pages.loginPage);
+    app.post('/login.html', api.createUser);
 
     //Якщо не підійшов жоден url, тоді повертаємо файли з папки www
     app.use(express.static(path.join(__dirname, '../Frontend/www')));

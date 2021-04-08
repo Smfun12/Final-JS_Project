@@ -36,3 +36,9 @@ exports.signUpPage = function(req, res) {
         pageTitle: 'Sign up'
     });
 };
+
+exports.loginPage = function(req, res) {
+    res.render('loginPage', {
+        pageTitle: 'Login'
+    });
+};

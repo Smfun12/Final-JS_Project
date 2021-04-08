@@ -1,3 +1,4 @@
+
 /**
  * Created by chaika on 09.02.16.
  */
@@ -29,4 +30,15 @@ function backendPost(url, data, callback) {
             callback(new Error("Ajax Failed"));
         }
     })
+}
+
+exports.homePage =  function (callback) {
+    backendGet('/',callback);
+}
+
+exports.checkUserInSystem = function (user_data, callback) {
+    backendPost("/", user_data, callback);
+}
+exports.createUser = function (user, call_back) {
+    backendPost("/login.html", user, call_back);
 }
