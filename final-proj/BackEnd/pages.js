@@ -43,8 +43,8 @@ exports.loginPage = function(req, res) {
     });
 };
 
-exports.orderParamPage = function(req, res) {
-    res.render('orderParamPage', {
-        pageTitle: 'Order a Delivery'
+exports.profilePage = function(req, res) {
+    res.render('profilePage', {
+        pageTitle: 'Profile'
     });
 };

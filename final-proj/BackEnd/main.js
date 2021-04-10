@@ -38,9 +38,6 @@ function configureEndpoints(app) {
     app.get('/login.html', pages.loginPage);
     app.post('/login.html', api.createUser);
 
-    // Друга сторінка нового замовлення доставки
-    app.get('/orderparam.html', pages.orderParamPage);
-
     //Якщо не підійшов жоден url, тоді повертаємо файли з папки www
     app.use(express.static(path.join(__dirname, '../Frontend/www')));
 }

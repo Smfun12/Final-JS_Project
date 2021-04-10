@@ -24,8 +24,9 @@
     </a>
     <div id = "nav-top"><span>Super quick delivery - we travel faster than sound!</span></div>
     <div id = "nav-bottom"><span>Trouble? Call +380-395-5566-12!</span> <span id="to-hide">We are available at any time of the day!</span></div>
-    <a href="http://localhost:3989/signup.html"> <img src = "./images/profile.jpg" id = "profile">
-    </a>
+
+    <img src = "./images/profile.jpg" id = "profile">
+
 </nav>
 <div class="loginForm">
     <label for="email">Email</label>
@@ -37,6 +38,9 @@
 <button type="button" id="sendUserData">Submit</button></div>
 <div id="error">
     Check user credentials
+</div>
+<div id="notFound">
+    User with your credentials is not found
 </div>
 
 <%- include('common/footer'); -%>

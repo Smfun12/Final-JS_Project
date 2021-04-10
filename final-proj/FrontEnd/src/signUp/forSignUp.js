@@ -91,6 +91,22 @@ $('#move-signup').on('click', function () {
     }
 });
 
+$('#profile').on('click', function () {
+    console.log(sessionStorage.getItem('user'));
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else{
+        window.location.href = 'http://localhost:3989/profile.html';
+    }
+});
+
+function sendToBack(error, data){
+    if (!error){
+        console.log(data);
+        window.location.href='http://localhost:3989/signup.html';
+    }
+}
 function parseName(name) {
     if(!name) return false;
     for(let i = 0; i < name.length; i++) {

@@ -46,7 +46,18 @@ exports.createUser = function (user, call_back) {
 
 },{}],2:[function(require,module,exports){
 let API =require('../API');
-
+// var mysql = require('mysql');
+//
+// var con = mysql.createConnection({
+//     host: "localhost:3306/js-project",
+//     user: "root",
+//     password: "!student21"
+// });
+//
+// con.connect(function(err) {
+//     if (err) throw err;
+//     console.log("Connected!");
+// });
 function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
@@ -66,8 +77,14 @@ function sendToBack(error, data) {
         console.log(data);
         if (data.length){
             console.log('200 OK');
-        }
+            sessionStorage.setItem('user',JSON.stringify(data[0]));
+            console.log(sessionStorage.getItem('user'));
             // API.homePage(temp);
+        }
+        else{
+            console.log('user does not exist');
+            $('#notFound').css({'height':'100px','opacity':'1'});
+        }
     }
     else{
         console.log('error');
@@ -96,11 +113,23 @@ $(function () {
     let homePage = require('./mainPage/home');
     let signUpPage = require('./signUp/forSignUp');
     let archivePage = require('./viewDeliveries/archive');
-    let loginPage = require('./login/login')
+    let loginPage = require('./login/login');
+    let profilePage = require('./profile/profile');
 });
-},{"./login/login":2,"./mainPage/home":4,"./signUp/forSignUp":5,"./viewDeliveries/archive":6}],4:[function(require,module,exports){
+},{"./login/login":2,"./mainPage/home":4,"./profile/profile":5,"./signUp/forSignUp":6,"./viewDeliveries/archive":7}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
+let user = JSON.parse(sessionStorage.getItem('user'));
+if (user) {
+    $('#profileEmail').text(user.email);
+    $('#full_name').text(user.firstname + ' ' + user.lastname);
+}
+$("#sign_out").on('click', function () {
+    sessionStorage.removeItem('user');
+    window.location.href='http://localhost:3989';
+});
+
+},{}],6:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -194,6 +223,22 @@ $('#move-signup').on('click', function () {
     }
 });
 
+$('#profile').on('click', function () {
+    console.log(sessionStorage.getItem('user'));
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else{
+        window.location.href = 'http://localhost:3989/profile.html';
+    }
+});
+
+function sendToBack(error, data){
+    if (!error){
+        console.log(data);
+        window.location.href='http://localhost:3989/signup.html';
+    }
+}
 function parseName(name) {
     if(!name) return false;
     for(let i = 0; i < name.length; i++) {
@@ -217,7 +262,7 @@ function parseEmail(email) {
     return re.test(email);
 }
 
-},{"../API":1}],6:[function(require,module,exports){
+},{"../API":1}],7:[function(require,module,exports){
 let viewOptions = false;
 let curSort = "status";
 
