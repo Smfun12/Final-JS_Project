@@ -1,7 +1,18 @@
 @import "homePage/header";
 @import "navbar";
-.loginForm {border: 3px solid #f1f1f1;}
-
+@formWidth: 500px;
+body{
+  background-image: url('http://getwallpapers.com/wallpaper/full/a/5/d/544750.jpg');
+}
+.loginForm {
+  border: 3px solid #f1f1f1;
+  width: @formWidth;
+  margin: 0 auto;
+}
+.loginForm label{
+  color: aqua;
+  font-family: monospace, serif;
+}
 input[type=email], input[type=password] {
   width: 100%;
   padding: 12px 20px;
@@ -24,4 +35,15 @@ button {
 button:hover {
   opacity: 0.8;
 }
-
+#error{
+  background-color: red;
+  color: wheat;
+  border-radius: 5px;
+  width: @formWidth;
+  height: 0;
+  opacity: 0;
+  margin: 0 auto;
+  text-align: center;
+  line-height: 100px;
+  transition:all 1s ease-out;
+}

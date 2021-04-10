@@ -45,123 +45,61 @@ exports.createUser = function (user, call_back) {
 }
 
 },{}],2:[function(require,module,exports){
+let API =require('../API');
+
+function parseEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+function parsePwd(password){
+    const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/;//Minimum eight characters, at least one letter and one number
+    return re.test(password);
+}
+function temp(error, data){
+    if (!error){
+        console.log(data);
+        window.location.href="http://localhost:3989";
+    }
+}
+function sendToBack(error, data) {
+    if (!error){
+        console.log(data);
+        if (data.length){
+            console.log('200 OK');
+        }
+            // API.homePage(temp);
+    }
+    else{
+        console.log('error');
+    }
+}
+
+$('#sendUserData').on('click', function () {
+    let email = $('#email').val();
+    let password = $('#password').val();
+    if (!parseEmail(email) || !parsePwd(password)) {
+        $('#error').css({'height':'100px','opacity':'1'});
+        return;
+    }
+    else{
+        $('#error').css({'height':'0','opacity':'0'});
+    }
+    let user_data = {
+        email: email,
+        password: password
+    }
+    console.log(user_data);
+    API.checkUserInSystem(user_data, sendToBack);
+});
+},{"../API":1}],3:[function(require,module,exports){
 $(function () {
     let homePage = require('./mainPage/home');
     let signUpPage = require('./signUp/forSignUp');
     let archivePage = require('./viewDeliveries/archive');
-    let orderPage = require('./orderPage/order');
+    let loginPage = require('./login/login')
 });
-},{"./mainPage/home":3,"./orderPage/order":4,"./signUp/forSignUp":5,"./viewDeliveries/archive":6}],3:[function(require,module,exports){
+},{"./login/login":2,"./mainPage/home":4,"./signUp/forSignUp":5,"./viewDeliveries/archive":6}],4:[function(require,module,exports){
 
-},{}],4:[function(require,module,exports){
-let nameCorrect = false;
-let surnameCorrect = false;
-let countryCodeCorrect = false;
-let phoneCorrect = false;
-
-$('#input-name').on('input', function () {
-    let correct = true;
-    let name = this.value;
-    if (name.length === 0) {
-        correct = false
-    } else for (let j = 0; j < name.length; j++) {
-        let cur = name.charAt(j);
-        if ((cur < 'A' || cur > 'Z') && (cur < 'a' || cur > 'z') && cur !== "'" && cur !== '-') {
-            correct = false;
-        }
-    }
-    if (correct) {
-        $('#name-success').show();
-        $('#name-failure').hide();
-        nameCorrect = true;
-        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
-            $('#btn-next').prop('disabled', false);
-        }
-    } else {
-        $('#name-success').hide();
-        $('#name-failure').show();
-        nameCorrect = false;
-        $('#btn-next').prop('disabled', true);
-    }
-});
-
-$('#input-surname').on('input', function () {
-    let correct = true;
-    let surname = this.value;
-    if (surname.length === 0) {
-        correct = false
-    } else for (let j = 0; j < surname.length; j++) {
-        let cur = surname.charAt(j);
-        if ((cur < 'A' || cur > 'Z') && (cur < 'a' || cur > 'z') && cur !== "'" && cur !== '-') {
-            correct = false;
-        }
-    }
-    if (correct) {
-        $('#surname-success').show();
-        $('#surname-failure').hide();
-        surnameCorrect = true;
-        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
-            $('#btn-next').prop('disabled', false);
-        }
-    } else {
-        $('#surname-success').hide();
-        $('#surname-failure').show();
-        surnameCorrect = false;
-        $('#btn-next').prop('disabled', true);
-    }
-});
-
-$('#input-country-code').on('input', function () {
-    let correct = true;
-    let countryCode = this.value;
-    if (countryCode.length < 2 || countryCode.length > 4 || countryCode.charAt(0) !== '+') {
-        correct = false
-    } else for (let j = 1; j < countryCode.length; j++) {
-        let cur = countryCode.charAt(j);
-        if (cur < '0' || cur > '9') {
-            correct = false;
-        }
-    }
-    if (correct) {
-        $('#country-code-success').show();
-        $('#country-code-failure').hide();
-        countryCodeCorrect = true;
-        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
-            $('#btn-next').prop('disabled', false);
-        }
-    } else {
-        $('#country-code-success').hide();
-        $('#country-code-failure').show();
-        countryCodeCorrect = false;
-        $('#btn-next').prop('disabled', true);
-    }
-});
-
-$('#input-phone').on('input', function () {
-    let correct = true;
-    let phone = this.value;
-    if (phone.length === 0) {
-        correct = false
-    } else for (let j = 0; j < phone.length; j++) {
-        let cur = phone.charAt(j);
-        if (cur < '0' || cur > '9') {
-            correct = false;
-        }
-    }
-    if (correct) {
-        $('#phone-success').show();
-        $('#phone-failure').hide();
-        phoneCorrect = true;
-        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
-            $('#btn-next').prop('disabled', false);
-        }
-    } else {
-        $('#phone-success').hide();
-        $('#phone-failure').show();
-        phoneCorrect = false;
-        $('#btn-next').prop('disabled', true);
-    }
-});
 },{}],5:[function(require,module,exports){
 let firstname;
 let lastname;
@@ -278,30 +216,7 @@ function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
-function temp(error, data){
-    if (!error){
-        console.log(data);
-    }
-}
-function sendToBack(error, data) {
-    if (!error){
-        console.log(data);
-        API.homePage(temp);
-    }
-    else{
-        console.log('error');
-    }
-}
-$('#sendUserData').on('click', function () {
-    let email = $('#email').val();
-    let password = $('#password').val();
-    let user_data = {
-        email: email,
-        password: password
-    }
-    console.log(user_data);
-    API.checkUserInSystem(user_data, sendToBack);
-});
+
 },{"../API":1}],6:[function(require,module,exports){
 let viewOptions = false;
 let curSort = "status";
@@ -454,4 +369,4 @@ function template(sortBy, dir) {
         $('#main-arrow-up').css('display', 'none');
     }
 }
-},{}]},{},[2]);
+},{}]},{},[3]);
