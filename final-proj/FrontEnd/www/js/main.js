@@ -45,14 +45,62 @@ exports.createUser = function (user, call_back) {
 }
 
 },{}],2:[function(require,module,exports){
+let API =require('../API');
+
+function parseEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+function parsePwd(password){
+    const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/;//Minimum eight characters, at least one letter and one number
+    return re.test(password);
+}
+function temp(error, data){
+    if (!error){
+        console.log(data);
+        window.location.href="http://localhost:3989";
+    }
+}
+function sendToBack(error, data) {
+    if (!error){
+        console.log(data);
+        if (data.length){
+            console.log('200 OK');
+        }
+            // API.homePage(temp);
+    }
+    else{
+        console.log('error');
+    }
+}
+
+$('#sendUserData').on('click', function () {
+    let email = $('#email').val();
+    let password = $('#password').val();
+    if (!parseEmail(email) || !parsePwd(password)) {
+        $('#error').css({'height':'100px','opacity':'1'});
+        return;
+    }
+    else{
+        $('#error').css({'height':'0','opacity':'0'});
+    }
+    let user_data = {
+        email: email,
+        password: password
+    }
+    console.log(user_data);
+    API.checkUserInSystem(user_data, sendToBack);
+});
+},{"../API":1}],3:[function(require,module,exports){
 $(function () {
     let homePage = require('./mainPage/home');
     let signUpPage = require('./signUp/forSignUp');
     let archivePage = require('./viewDeliveries/archive');
+    let loginPage = require('./login/login')
 });
-},{"./mainPage/home":3,"./signUp/forSignUp":4,"./viewDeliveries/archive":5}],3:[function(require,module,exports){
+},{"./login/login":2,"./mainPage/home":4,"./signUp/forSignUp":5,"./viewDeliveries/archive":6}],4:[function(require,module,exports){
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -168,31 +216,8 @@ function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
-function temp(error, data){
-    if (!error){
-        console.log(data);
-    }
-}
-function sendToBack(error, data) {
-    if (!error){
-        console.log(data);
-        API.homePage(temp);
-    }
-    else{
-        console.log('error');
-    }
-}
-$('#sendUserData').on('click', function () {
-    let email = $('#email').val();
-    let password = $('#password').val();
-    let user_data = {
-        email: email,
-        password: password
-    }
-    console.log(user_data);
-    API.checkUserInSystem(user_data, sendToBack);
-});
-},{"../API":1}],5:[function(require,module,exports){
+
+},{"../API":1}],6:[function(require,module,exports){
 let viewOptions = false;
 let curSort = "status";
 
@@ -344,4 +369,4 @@ function template(sortBy, dir) {
         $('#main-arrow-up').css('display', 'none');
     }
 }
-},{}]},{},[2]);
+},{}]},{},[3]);

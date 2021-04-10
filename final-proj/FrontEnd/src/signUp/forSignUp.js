@@ -113,27 +113,3 @@ function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
-function temp(error, data){
-    if (!error){
-        console.log(data);
-    }
-}
-function sendToBack(error, data) {
-    if (!error){
-        console.log(data);
-        API.homePage(temp);
-    }
-    else{
-        console.log('error');
-    }
-}
-$('#sendUserData').on('click', function () {
-    let email = $('#email').val();
-    let password = $('#password').val();
-    let user_data = {
-        email: email,
-        password: password
-    }
-    console.log(user_data);
-    API.checkUserInSystem(user_data, sendToBack);
-});
