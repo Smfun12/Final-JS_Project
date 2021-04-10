@@ -42,3 +42,9 @@ exports.loginPage = function(req, res) {
         pageTitle: 'Login'
     });
 };
+
+exports.profilePage = function(req, res) {
+    res.render('profilePage', {
+        pageTitle: 'Profile'
+    });
+};

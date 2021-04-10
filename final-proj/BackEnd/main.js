@@ -38,6 +38,7 @@ function configureEndpoints(app) {
     app.get('/login.html', pages.loginPage);
     app.post('/login.html', api.createUser);
 
+    app.get('/profile.html', pages.profilePage);
     //Якщо не підійшов жоден url, тоді повертаємо файли з папки www
     app.use(express.static(path.join(__dirname, '../Frontend/www')));
 }

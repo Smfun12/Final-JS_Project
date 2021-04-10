@@ -3,7 +3,7 @@
  */
 let array = []
 exports.homePage = function (req, res) {
-    res.send(req.body);
+    res.send('Loading home page...');
 }
 function notExist(user) {
     for (let i = 0; i < array.length; i++){
@@ -19,8 +19,7 @@ function notExist(user) {
 exports.checkUserInSystem = function (req, res){
     let user = req.body;
     if (notExist(user)){
-        console.log(array);
-        res.send('user does not exist');
+        res.send([]);
     }
     else{
         res.send(array);
