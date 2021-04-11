@@ -1,7 +1,7 @@
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
-    $('#full_name').text(user.firstname + ' ' + user.lastname);
+    $('#full_name').text(user.name);
 }
 $("#sign_out").on('click', function () {
     sessionStorage.removeItem('user');
