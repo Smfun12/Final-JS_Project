@@ -46,18 +46,7 @@ exports.createUser = function (user, call_back) {
 
 },{}],2:[function(require,module,exports){
 let API =require('../API');
-// var mysql = require('mysql');
-//
-// var con = mysql.createConnection({
-//     host: "localhost:3306/js-project",
-//     user: "root",
-//     password: "!student21"
-// });
-//
-// con.connect(function(err) {
-//     if (err) throw err;
-//     console.log("Connected!");
-// });
+
 function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
@@ -74,12 +63,14 @@ function temp(error, data){
 }
 function sendToBack(error, data) {
     if (!error){
-        console.log(data);
-        if (data.length){
+        let user = data;
+        console.log("Data from bacK: " + user.email);
+        console.log(user);
+        if (user.email){
             console.log('200 OK');
-            sessionStorage.setItem('user',JSON.stringify(data[0]));
+            sessionStorage.setItem('user',JSON.stringify(user));
             console.log(sessionStorage.getItem('user'));
-            // API.homePage(temp);
+            API.homePage(temp);
         }
         else{
             console.log('user does not exist');
@@ -96,6 +87,7 @@ $('#sendUserData').on('click', function () {
     let password = $('#password').val();
     if (!parseEmail(email) || !parsePwd(password)) {
         $('#error').css({'height':'100px','opacity':'1'});
+        $('#notFound').css({'height':'100px','opacity':'0'});
         return;
     }
     else{
@@ -122,7 +114,7 @@ $(function () {
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
-    $('#full_name').text(user.firstname + ' ' + user.lastname);
+    $('#full_name').text(user.name);
 }
 $("#sign_out").on('click', function () {
     sessionStorage.removeItem('user');
