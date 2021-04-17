@@ -3,12 +3,44 @@
 <!-- Написати: <link rel="stylesheet/less" type="text/css" href="less/***.less" /> -->
 <!-- Якщо треба navbar => @import "navbar"; -->
 <!-- Приклад -->
-<link rel="stylesheet/less" type="text/css" href="less/main.less" />
+<link rel="stylesheet/less" type="text/css" href="less/myDeliveriesPage/myDeliveriesMain.less" />
 <!-- Приклад -->
 <!-- LESS JavaScript компілятор -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js"></script>
 </head>
 <body>
 <%- include('common/navbar'); -%>
+
+<div id = "is-empty">
+    No Deliveries to Display
+</div>
+
+<div id = "wrapper">
+    <div id = "slideup-for-sort">
+        Sorted by: <span>Delivery Status</span>
+        <img id = "main-arrow-down" class = 'arrow-down' src = "images/arrowDown.png">
+        <img id = "main-arrow-up" class = 'arrow-up' src = "images/arrowUp.png">
+    </div>
+    <div class = "sort-item" id = "date">
+        Delivery Date
+        <img id = "date-arrow-down" class = 'arrow-down' src = "images/arrowDown.png">
+        <img id = "date-arrow-up" class = 'arrow-up' src = "images/arrowUp.png">
+    </div>
+    <div class = "sort-item" id = "cost">
+        Delivery Cost
+        <img id = "cost-arrow-down" class = 'arrow-down' src = "images/arrowDown.png">
+        <img id = "cost-arrow-up" class = 'arrow-up' src = "images/arrowUp.png">
+    </div>
+    <div class = "sort-item" id = "dest">
+        Destination
+        <img id = "dest-arrow-down" class = 'arrow-down' src = "images/arrowDown.png">
+        <img id = "dest-arrow-up" class = 'arrow-up' src = "images/arrowUp.png">
+    </div>
+    <div class = "sort-item" id = "status">
+        Delivery Status
+        <img id = "status-arrow-down" class = 'arrow-down' src = "images/arrowDown.png">
+        <img id = "status-arrow-up" class = 'arrow-up' src = "images/arrowUp.png">
+    </div>
+</div>
 
 <%- include('common/footer'); -%>

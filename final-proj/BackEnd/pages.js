@@ -37,8 +37,8 @@ exports.signUpPage = function(req, res) {
     });
 };
 
-exports.orderParamPage = function(req, res) {
-    res.render('orderParamPage', {
-        pageTitle: 'Order a Delivery'
+exports.loginPage = function(req, res) {
+    res.render('loginPage', {
+        pageTitle: 'Login'
     });
 };

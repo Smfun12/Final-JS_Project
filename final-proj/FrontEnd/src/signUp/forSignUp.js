@@ -3,6 +3,8 @@ let lastname;
 let address;
 let code;
 
+let API = require('../API');
+
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -35,9 +37,11 @@ $('#sign-up-btn').on('click', function () {
     $('#learn-name').show();
     $('#move-signup').show();
 });
+let user = {
 
+};
 $('#move-signup').on('click', function () {
-    if ($('#learn-name').css('display') != 'none') {
+    if ($('#learn-name').css('display') !== 'none') {
         let name = $('#input-name').val();
         name = trim(name);
         if(!parseName(name)) {
@@ -46,9 +50,10 @@ $('#move-signup').on('click', function () {
             $('#learn-name').hide();
             $('#learn-surname').show();
             firstname = name;
+            user.firstname = firstname;
         }
-        return;
-    } else if ($('#learn-surname').css('display') != 'none') {
+
+    } else if ($('#learn-surname').css('display') !== 'none') {
         let surname = $('#input-surname').val();
         surname = trim(surname);
         if(!parseName(surname)) {
@@ -57,9 +62,10 @@ $('#move-signup').on('click', function () {
             $('#learn-surname').hide();
             $('#learn-email').show();
             lastname = surname;
+            user.lastname = lastname;
         }
-        return;
-    } else if ($('#learn-email').css('display') != 'none') {
+
+    } else if ($('#learn-email').css('display') !== 'none') {
         let email = $('#input-email').val();
         email = trim(email);
         if(!parseEmail(email)) {
@@ -69,17 +75,19 @@ $('#move-signup').on('click', function () {
             $('#validate-email').show();
             address = email;
             code = sendMail(firstname, lastname, address);
+            user.email = email;
         }
-        return;
-    } else if ($('#validate-email').css('display') != 'none') {
+
+    } else if ($('#validate-email').css('display') !== 'none') {
         let number = Number.parseInt($('#input-code').val());
         if(number !== code) {
             $('#invalid-code').show();
         } else {
             $('#validate-email').hide();
             //$('#validate-email').show();
+            API.createUser(user, sendToBack);
         }
-        return;
+
     }
 });
 
@@ -105,3 +113,27 @@ function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
+function temp(error, data){
+    if (!error){
+        console.log(data);
+    }
+}
+function sendToBack(error, data) {
+    if (!error){
+        console.log(data);
+        API.homePage(temp);
+    }
+    else{
+        console.log('error');
+    }
+}
+$('#sendUserData').on('click', function () {
+    let email = $('#email').val();
+    let password = $('#password').val();
+    let user_data = {
+        email: email,
+        password: password
+    }
+    console.log(user_data);
+    API.checkUserInSystem(user_data, sendToBack);
+});
