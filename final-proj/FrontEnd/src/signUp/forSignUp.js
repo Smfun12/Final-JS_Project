@@ -84,7 +84,18 @@ $('#move-signup').on('click', function () {
             $('#invalid-code').show();
         } else {
             $('#validate-email').hide();
-            //$('#validate-email').show();
+            $('#learn-password').show();
+        }
+
+    } else if ($('#learn-password').css('display') !== 'none') {
+        let password = $('#input-password').val();
+        password = trim(password);
+        console.log(password);
+        if(!parsePwd(password)) {
+            $('#invalid-password').show();
+        } else {
+            $('#learn-password').hide();
+            user.password = password;
             API.createUser(user, sendToBack);
         }
 
@@ -105,6 +116,9 @@ function sendToBack(error, data){
     if (!error){
         console.log(data);
         window.location.href='http://localhost:3989/signup.html';
+    }
+    else{
+        console.log('error');
     }
 }
 function parseName(name) {
@@ -128,4 +142,8 @@ function trim(str) {
 function parseEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
+}
+function parsePwd(password){
+    const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/;//Minimum eight characters, at least one letter and one number
+    return re.test(password);
 }

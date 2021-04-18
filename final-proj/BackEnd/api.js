@@ -1,9 +1,11 @@
 /**
  Get data from server
  */
-let array = []
 const mysql = require("mysql");
-const sql = "INSERT INTO users(name, email) VALUES(?, ?)";
+const bcrypt = require('bcrypt');
+
+let array = []
+const sql = "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
 const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -29,14 +31,16 @@ exports.checkUserInSystem = function (req, res) {
         function (err, results, fields) {
             console.log(err);
             console.log(results);// собственно данные
-            console.log(results[0].email);
-            console.log(user.email);
-            if (results[0].email === user.email){
+            console.log(results[0].password);
+            console.log(user.password);
+            if (results[0].email === user.email && bcrypt.compareSync(user.password, results[0].password)){
+                console.log('Match');
                 exist = true;
                 user.name = results[0].name;
                 res.send(user);
             }
             else {
+                console.log('Does not Match');
                 res.send([]);
             }
         });
@@ -44,7 +48,10 @@ exports.checkUserInSystem = function (req, res) {
 }
 exports.createUser = function (req, res) {
     let user = req.body;
-    let db_user = [user.firstname, user.email];
+    let hash = bcrypt.hashSync(user.password, 10);
+    console.log(user.password);
+    console.log(hash);
+    let db_user = [user.firstname, user.email, hash];
     if (array.includes(user)) {
         res.send('user exist');
     } else {
