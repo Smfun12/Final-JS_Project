@@ -3,7 +3,7 @@ let surnameCorrect = false;
 let countryCodeCorrect = false;
 let phoneCorrect = false;
 
-document.getElementById('input-name').addEventListener('input', function () {
+$('#input-name').on('input', function () {
     let correct = true;
     let name = this.value;
     if (name.length === 0) {
@@ -29,7 +29,7 @@ document.getElementById('input-name').addEventListener('input', function () {
     }
 });
 
-document.getElementById('input-surname').addEventListener('input', function () {
+$('#input-surname').on('input', function () {
     let correct = true;
     let surname = this.value;
     if (surname.length === 0) {
@@ -55,7 +55,7 @@ document.getElementById('input-surname').addEventListener('input', function () {
     }
 });
 
-document.getElementById('input-country-code').addEventListener('input', function () {
+$('#input-country-code').on('input', function () {
     let correct = true;
     let countryCode = this.value;
     if (countryCode.length < 2 || countryCode.length > 4 || countryCode.charAt(0) !== '+') {
@@ -81,7 +81,7 @@ document.getElementById('input-country-code').addEventListener('input', function
     }
 });
 
-document.getElementById('input-phone').addEventListener('input', function () {
+$('#input-phone').on('input', function () {
     let correct = true;
     let phone = this.value;
     if (phone.length === 0) {
