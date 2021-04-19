@@ -1,18 +1,49 @@
+const templates = require('./delTemp');
+const deliveriesList = require('./deliveriesList');
+
 let viewOptions = false;
 let curSort = "status";
+let $delList = $("#add-deliveries");
+let deliveries;
 
-$('#slideup-for-sort').on('click', function () {
-    //console.log("clicked>>>");
+function initializeArchive() {
+    deliveries = deliveriesList.getDeliveries();
+    if (deliveries.length === 0) {
+        $('#is-empty').css('display', 'block');
+    }
+    for (let i = 0; i < deliveries.length; i++) {
+        if(deliveries[i].status.length > 12) {
+            deliveries[i].status = deliveries[i].status.substring(0, 9);
+            deliveries[i].status += "...";
+        }
+        if(deliveries[i].destination.length > 14) {
+            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
+            deliveries[i].destination += "...";
+        }
+    }
+    deliveries.sort(sortByStatusAsc);
+    update();
+
+    /*let n = deliveries.length;
+    for (let i = 0; i < n; i++) {
+        let id = '#item' + i;
+        $(id).on('click', function () {
+            alert(id);
+        });
+    }*/
+}
+
+$('.slideup-for-sort').on('click', function () {
     if (!viewOptions) {
-        let height = $('#slideup-for-sort').height();
-        $('#slideup-for-sort').css("bottom", 8*height);
+        let height = $('.slideup-for-sort').height();
+        $('.slideup-for-sort').css("bottom", 8*height);
         $('.sort-item').css('visibility', 'visible');
         $('#date').css("bottom", 2*height);
         $('#dest').css("bottom", 4*height);
         $('#status').css("bottom", 6*height);
         viewOptions = true;
     } else {
-        $('#slideup-for-sort').css("bottom", "0");
+        $('.slideup-for-sort').css("bottom", "0");
         $('#date').css("bottom", "0");
         $('#dest').css("bottom", "0");
         $('#status').css("bottom", "0");
@@ -24,110 +55,70 @@ $('#slideup-for-sort').on('click', function () {
 });
 
 $('#date').on('click', function() {
-    if(curSort === "date") return;
-    curSort = "date";
-    $('#dest-arrow-down').css('visibility', 'hidden');
-    $('#dest-arrow-up').css('visibility', 'hidden');
-    $('#cost-arrow-down').css('visibility', 'hidden');
-    $('#cost-arrow-up').css('visibility', 'hidden');
-    $('#status-arrow-down').css('visibility', 'hidden');
-    $('#status-arrow-up').css('visibility', 'hidden');
-    $('#date-arrow-down').css('visibility', 'visible');
-    $('#date-arrow-down').css('opacity', '0.5');
-    $('#date-arrow-up').css('visibility', 'visible');
-    $('#date-arrow-up').css('opacity', '1');
-    $('#slideup-for-sort span').text('Delivery Date');
-    $('#main-arrow-down').css('display', 'none');
-    $('#main-arrow-up').css('display', 'block');
+    templateToSortByOtherVal('date');
 });
 
 $('#dest').on('click', function() {
-    if(curSort === "dest") return;
-    curSort = "dest";
-    $('#date-arrow-down').css('visibility', 'hidden');
-    $('#date-arrow-up').css('visibility', 'hidden');
-    $('#cost-arrow-down').css('visibility', 'hidden');
-    $('#cost-arrow-up').css('visibility', 'hidden');
-    $('#status-arrow-down').css('visibility', 'hidden');
-    $('#status-arrow-up').css('visibility', 'hidden');
-    $('#dest-arrow-down').css('visibility', 'visible');
-    $('#dest-arrow-down').css('opacity', '0.5');
-    $('#dest-arrow-up').css('visibility', 'visible');
-    $('#dest-arrow-up').css('opacity', '1');
-    $('#slideup-for-sort span').text('Destination');
-    $('#main-arrow-down').css('display', 'none');
-    $('#main-arrow-up').css('display', 'block');
+    templateToSortByOtherVal('dest');
 });
 
 $('#cost').on('click', function() {
-    if(curSort === "cost") return;
-    curSort = "cost";
-    $('#date-arrow-down').css('visibility', 'hidden');
-    $('#date-arrow-up').css('visibility', 'hidden');
-    $('#dest-arrow-down').css('visibility', 'hidden');
-    $('#dest-arrow-up').css('visibility', 'hidden');
-    $('#status-arrow-down').css('visibility', 'hidden');
-    $('#status-arrow-up').css('visibility', 'hidden');
-    $('#cost-arrow-down').css('visibility', 'visible');
-    $('#cost-arrow-down').css('opacity', '0.5');
-    $('#cost-arrow-up').css('visibility', 'visible');
-    $('#cost-arrow-up').css('opacity', '1');
-    $('#slideup-for-sort span').text('Delivery Cost');
-    $('#main-arrow-down').css('display', 'none');
-    $('#main-arrow-up').css('display', 'block');
+    templateToSortByOtherVal('cost');
 });
 
 $('#status').on('click', function() {
-    if(curSort === "status") return;
-    curSort = "status";
-    $('#date-arrow-down').css('visibility', 'hidden');
-    $('#date-arrow-up').css('visibility', 'hidden');
-    $('#cost-arrow-down').css('visibility', 'hidden');
-    $('#cost-arrow-up').css('visibility', 'hidden');
-    $('#dest-arrow-down').css('visibility', 'hidden');
-    $('#dest-arrow-up').css('visibility', 'hidden');
-    $('#status-arrow-down').css('visibility', 'visible');
-    $('#status-arrow-down').css('opacity', '0.5');
-    $('#status-arrow-up').css('visibility', 'visible');
-    $('#status-arrow-up').css('opacity', '1');
-    $('#slideup-for-sort span').text('Delivery Status');
-    $('#main-arrow-down').css('display', 'none');
-    $('#main-arrow-up').css('display', 'block');
+    templateToSortByOtherVal('status');
 });
 
 $('#date-arrow-down').on('click', function () {
-    template('date', 'down');
+    templateForArrowClick('date', 'down');
+    deliveries.sort(sortByDateDesc);
+    update();
 });
 
 $('#date-arrow-up').on('click', function () {
-    template('date', 'up');
+    templateForArrowClick('date', 'up');
+    deliveries.sort(sortByDateAsc);
+    update();
 });
 
 $('#status-arrow-down').on('click', function () {
-   template('status', 'down');
+   templateForArrowClick('status', 'down');
+    deliveries.sort(sortByStatusDesc);
+    update();
 });
 
 $('#status-arrow-up').on('click', function () {
-    template('status', 'up');
+    templateForArrowClick('status', 'up');
+    deliveries.sort(sortByStatusAsc);
+    update();
 });
 
 $('#dest-arrow-down').on('click', function () {
-    template('dest', 'down');
+    templateForArrowClick('dest', 'down');
+    deliveries.sort(sortByDestinationDesc);
+    update();
 });
 
 $('#dest-arrow-up').on('click', function () {
-    template('dest', 'up');
+    templateForArrowClick('dest', 'up');
+    deliveries.sort(sortByDestinationAsc);
+    update();
 });
 
 $('#cost-arrow-down').on('click', function () {
-    template('cost', 'down');
+    templateForArrowClick('cost', 'down');
+    deliveries.sort(sortByCostDesc);
+    update();
 });
 
 $('#cost-arrow-up').on('click', function () {
-    template('cost', 'up');
+    templateForArrowClick('cost', 'up');
+    deliveries.sort(sortByCostAsc);
+    update();
 });
 
-function template(sortBy, dir) {
+function templateForArrowClick(sortBy, dir) {
     if (dir !== 'up' && dir != 'down') return;
     let clicked = '#' + sortBy + '-arrow-down';
     let opposite = '#' + sortBy + '-arrow-up';
@@ -149,3 +140,123 @@ function template(sortBy, dir) {
         $('#main-arrow-up').css('display', 'none');
     }
 }
+
+function templateToSortByOtherVal(sortBy) {
+    if(curSort === sortBy) return;
+    curSort = sortBy;
+    if (sortBy !== "date") {
+        $('#date-arrow-down').css('visibility', 'hidden');
+        $('#date-arrow-up').css('visibility', 'hidden');
+    } else {
+        $('#date-arrow-down').css('visibility', 'visible');
+        $('#date-arrow-down').css('opacity', '0.5');
+        $('#date-arrow-up').css('visibility', 'visible');
+        $('#date-arrow-up').css('opacity', '1');
+    }
+    if (sortBy !== "cost") {
+        $('#cost-arrow-down').css('visibility', 'hidden');
+        $('#cost-arrow-up').css('visibility', 'hidden');
+    } else {
+        $('#cost-arrow-down').css('visibility', 'visible');
+        $('#cost-arrow-down').css('opacity', '0.5');
+        $('#cost-arrow-up').css('visibility', 'visible');
+        $('#cost-arrow-up').css('opacity', '1');
+    }
+    if (sortBy !== "dest") {
+        $('#dest-arrow-down').css('visibility', 'hidden');
+        $('#dest-arrow-up').css('visibility', 'hidden');
+    } else {
+        $('#dest-arrow-down').css('visibility', 'visible');
+        $('#dest-arrow-down').css('opacity', '0.5');
+        $('#dest-arrow-up').css('visibility', 'visible');
+        $('#dest-arrow-up').css('opacity', '1');
+    }
+    if (sortBy !== "status") {
+        $('#status-arrow-down').css('visibility', 'hidden');
+        $('#status-arrow-up').css('visibility', 'hidden');
+    } else {
+        $('#status-arrow-down').css('visibility', 'visible');
+        $('#status-arrow-down').css('opacity', '0.5');
+        $('#status-arrow-up').css('visibility', 'visible');
+        $('#status-arrow-up').css('opacity', '1');
+    }
+    let text = 'Delivery ';
+    if (sortBy === 'date') {
+        text += "Date";
+        deliveries.sort(sortByDateAsc);
+    }
+    if (sortBy === 'dest') {
+        text += "Destination";
+        deliveries.sort(sortByDestinationAsc);
+    }
+    if (sortBy === 'cost') {
+        text += "Cost";
+        deliveries.sort(sortByCostAsc);
+    }
+    if (sortBy === 'status') {
+        text += "Status";
+        deliveries.sort(sortByStatusAsc);
+    }
+    $('.slideup-for-sort span').text(text);
+    $('#main-arrow-down').css('display', 'none');
+    $('#main-arrow-up').css('display', 'block');
+
+    update();
+}
+
+function sortByStatusAsc(delivery1, delivery2) {
+    if (delivery1.status < delivery2.status) return -1;
+    else if (delivery1.status === delivery2.status) return 0;
+    else return 1;
+}
+
+function sortByStatusDesc(delivery1, delivery2) {
+    return -sortByStatusAsc(delivery1, delivery2);
+}
+
+function sortByDestinationAsc(delivery1, delivery2) {
+    if (delivery1.destination < delivery2.destination) return -1;
+    else if (delivery1.destination === delivery2.destination) return 0;
+    else return 1;
+}
+
+function sortByDestinationDesc(delivery1, delivery2) {
+    return -sortByDestinationAsc(delivery1, delivery2);
+}
+
+function sortByDateAsc(delivery1, delivery2) {
+    if (delivery1.date < delivery2.date) return -1;
+    else if (delivery1.date === delivery2.date) return 0;
+    else return 1;
+}
+
+function sortByDateDesc(delivery1, delivery2) {
+    return -sortByDateAsc(delivery1, delivery2);
+}
+
+function sortByCostAsc(delivery1, delivery2) {
+    if (delivery1.cost < delivery2.cost) return -1;
+    else if (delivery1.cost === delivery2.cost) return 0;
+    else return 1;
+}
+
+function sortByCostDesc(delivery1, delivery2) {
+    return -sortByCostAsc(delivery1, delivery2);
+}
+
+function update () {
+    $delList.html("");
+    for (let i = 0; i < deliveries.length; i++) {
+        let html_code = templates.deliveryItem({
+            numId: -1,
+            description: deliveries[i].description,
+            date: deliveries[i].date,
+            cost: deliveries[i].cost,
+            status: deliveries[i].status,
+            destination: deliveries[i].destination,
+        });
+        $delList.append($(html_code));
+    }
+}
+
+exports.initializeArchive = initializeArchive;

@@ -17,7 +17,7 @@ function sendMail(name, surname, email) {
     Email.send({
         Host: "smtp.gmail.com",
         Username: "universal.delivery.noreply@gmail.com",
-        Password: "lvirrisaeyudvnlee",
+        Password: "ausrveldnvryiilee",
         To: email,
         From: "universal.delivery.noreply@gmail.com",
         Subject: "Verification Letter",
@@ -27,7 +27,7 @@ function sendMail(name, surname, email) {
                 + code,
     })
         .then(function (message) {
-            //alert("mail sent successfully")
+            alert("mail sent successfully")
         });
     return code;
 }

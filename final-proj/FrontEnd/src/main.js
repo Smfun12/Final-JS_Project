@@ -5,4 +5,8 @@ $(function () {
     let loginPage = require('./login/login');
     let profilePage = require('./profile/profile');
     let orderPage = require('./orderPage/order');
+    let payPage = require('./payments/payments');
+
+    archivePage.initializeArchive();
+    payPage.initializePayments();
 });

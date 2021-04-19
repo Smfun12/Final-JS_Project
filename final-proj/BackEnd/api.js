@@ -1,6 +1,7 @@
 /**
  Get data from server
  */
+const crypto = require('crypto');
 const mysql = require("mysql");
 const bcrypt = require('bcrypt');
 
@@ -62,4 +63,38 @@ exports.createUser = function (req, res) {
         array.push(user);
         res.send(array);
     }
+}
+
+exports.createPayment = function(req, res) {
+    var payment_info = req.body;
+
+    var payment = {
+        version: 3,
+        public_key: 'sandbox_i36114102730',
+        action: "pay",
+        amount: payment_info.amount,
+        currency: "UAH",
+        description: payment_info.description,
+        order_id: Math.random(),
+        //!!!Важливо щоб було 1, бо інакше візьме гроші!!!
+        sandbox: 1
+    };
+    var data = base64(JSON.stringify(payment));
+    var signature = sha1('sandbox_WwsOjjQLPLAUNUMZeUwpzArLqcctuviHNFbx3hx3' + data + 'sandbox_WwsOjjQLPLAUNUMZeUwpzArLqcctuviHNFbx3hx3');
+
+    res.send({
+        data: data,
+        signature: signature,
+        success: true
+    });
+};
+
+function base64(str) {
+    return new Buffer(str).toString('base64');
+}
+
+function sha1(string) {
+    var sha1 = crypto.createHash('sha1');
+    sha1.update(string);
+    return sha1.digest('base64');
 }

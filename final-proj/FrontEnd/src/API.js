@@ -42,3 +42,7 @@ exports.checkUserInSystem = function (user_data, callback) {
 exports.createUser = function (user, call_back) {
     backendPost("/login.html", user, call_back);
 }
+
+exports.createPayment = function(payment_info, callback) {
+    backendPost("/api/create-payment/", payment_info, callback);
+};
