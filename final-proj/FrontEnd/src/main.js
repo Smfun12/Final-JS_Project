@@ -4,4 +4,5 @@ $(function () {
     let archivePage = require('./viewDeliveries/archive');
     let loginPage = require('./login/login');
     let profilePage = require('./profile/profile');
+    let orderPage = require('./orderPage/order');
 });

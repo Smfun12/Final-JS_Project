@@ -26,6 +26,9 @@ function configureEndpoints(app) {
     // Сторінка нового замовлення доставки
     app.get('/order.html', pages.orderPage);
 
+    // Друга сторінка нового замовлення (параметри доставки)
+    app.get('/orderparam.html', pages.orderParamPage);
+
     // Сторінка міні-маґазину
     app.get('/shop.html', pages.shopPage);
 

@@ -107,10 +107,120 @@ $(function () {
     let archivePage = require('./viewDeliveries/archive');
     let loginPage = require('./login/login');
     let profilePage = require('./profile/profile');
+    let orderPage = require('./orderPage/order');
 });
-},{"./login/login":2,"./mainPage/home":4,"./profile/profile":5,"./signUp/forSignUp":6,"./viewDeliveries/archive":7}],4:[function(require,module,exports){
+},{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./profile/profile":6,"./signUp/forSignUp":7,"./viewDeliveries/archive":8}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
+let nameCorrect = false;
+let surnameCorrect = false;
+let countryCodeCorrect = false;
+let phoneCorrect = false;
+
+$('#input-name').on('input', function () {
+    let correct = true;
+    let name = this.value;
+    if (name.length === 0) {
+        correct = false
+    } else for (let j = 0; j < name.length; j++) {
+        let cur = name.charAt(j);
+        if ((cur < 'A' || cur > 'Z') && (cur < 'a' || cur > 'z') && cur !== "'" && cur !== '-') {
+            correct = false;
+        }
+    }
+    if (correct) {
+        $('#name-success').show();
+        $('#name-failure').hide();
+        nameCorrect = true;
+        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
+            $('#btn-next').prop('disabled', false);
+        }
+    } else {
+        $('#name-success').hide();
+        $('#name-failure').show();
+        nameCorrect = false;
+        $('#btn-next').prop('disabled', true);
+    }
+});
+
+$('#input-surname').on('input', function () {
+    let correct = true;
+    let surname = this.value;
+    if (surname.length === 0) {
+        correct = false
+    } else for (let j = 0; j < surname.length; j++) {
+        let cur = surname.charAt(j);
+        if ((cur < 'A' || cur > 'Z') && (cur < 'a' || cur > 'z') && cur !== "'" && cur !== '-') {
+            correct = false;
+        }
+    }
+    if (correct) {
+        $('#surname-success').show();
+        $('#surname-failure').hide();
+        surnameCorrect = true;
+        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
+            $('#btn-next').prop('disabled', false);
+        }
+    } else {
+        $('#surname-success').hide();
+        $('#surname-failure').show();
+        surnameCorrect = false;
+        $('#btn-next').prop('disabled', true);
+    }
+});
+
+$('#input-country-code').on('input', function () {
+    let correct = true;
+    let countryCode = this.value;
+    if (countryCode.length < 2 || countryCode.length > 4 || countryCode.charAt(0) !== '+') {
+        correct = false
+    } else for (let j = 1; j < countryCode.length; j++) {
+        let cur = countryCode.charAt(j);
+        if (cur < '0' || cur > '9') {
+            correct = false;
+        }
+    }
+    if (correct) {
+        $('#country-code-success').show();
+        $('#country-code-failure').hide();
+        countryCodeCorrect = true;
+        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
+            $('#btn-next').prop('disabled', false);
+        }
+    } else {
+        $('#country-code-success').hide();
+        $('#country-code-failure').show();
+        countryCodeCorrect = false;
+        $('#btn-next').prop('disabled', true);
+    }
+});
+
+$('#input-phone').on('input', function () {
+    let correct = true;
+    let phone = this.value;
+    if (phone.length === 0) {
+        correct = false
+    } else for (let j = 0; j < phone.length; j++) {
+        let cur = phone.charAt(j);
+        if (cur < '0' || cur > '9') {
+            correct = false;
+        }
+    }
+    if (correct) {
+        $('#phone-success').show();
+        $('#phone-failure').hide();
+        phoneCorrect = true;
+        if (nameCorrect && surnameCorrect && countryCodeCorrect && phoneCorrect) {
+            $('#btn-next').prop('disabled', false);
+        }
+    } else {
+        $('#phone-success').hide();
+        $('#phone-failure').show();
+        phoneCorrect = false;
+        $('#btn-next').prop('disabled', true);
+    }
+});
+},{}],6:[function(require,module,exports){
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
@@ -121,7 +231,7 @@ $("#sign_out").on('click', function () {
     window.location.href='http://localhost:3989';
 });
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -272,7 +382,7 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],7:[function(require,module,exports){
+},{"../API":1}],8:[function(require,module,exports){
 let viewOptions = false;
 let curSort = "status";
 

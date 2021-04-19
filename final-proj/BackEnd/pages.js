@@ -48,3 +48,9 @@ exports.profilePage = function(req, res) {
         pageTitle: 'Profile'
     });
 };
+
+exports.orderParamPage = function(req, res) {
+    res.render('orderParamPage', {
+        pageTitle: 'Order a Delivery'
+    });
+};
