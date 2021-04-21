@@ -106,3 +106,8 @@ $('#input-phone').on('input', function () {
         $('#btn-next').prop('disabled', true);
     }
 });
+
+exports.name = $('#input-name').value;
+exports.surname = $('#input-surname').value;
+exports.phone = $('#input-country-code').value + $('#input-phone').value;
+exports.planet = $('#planets').val();
