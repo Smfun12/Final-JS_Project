@@ -11,15 +11,15 @@ function getDeliveries() {
             description: "Some description 1",
             date: "Date 1",
             cost: 10,
-            status: "Status 1",
+            status: "some Status 1",
             destination: "Destination 1"
         },
         {
             description: "Some description 2",
             date: "Date 2",
             cost: 1,
-            status: "Status 2",
-            destination: "Destination 2"
+            status: "some Status 2",
+            destination: "some Destination 2"
         },
         {
             description: "Some description 3",

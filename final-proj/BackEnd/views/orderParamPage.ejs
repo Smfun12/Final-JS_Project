@@ -11,4 +11,58 @@
 <body>
 <%- include('common/navbar'); -%>
 
+<div class="container">
+    <div class="row">
+        <label id="label-head-param"> Please enter the information about the delivery </label>
+        <br><br>
+    </div>
+    <div id="div-evaluated-cost">Evaluated cost (UAH):</div>
+    <input class="form-control input-lg" id="input-cost" type="number" maxlength="6" placeholder="200">
+    <div class="success" id="cost-success">Let it be.</div>
+    <div class="failure" id="cost-failure">
+        The evaluated cost is a number above 0 and below 200000 :(
+    </div>
+    <br>
+    <textarea class="form-control" id="text-desc" rows="3" placeholder="Description"></textarea>
+    <br>
+    Who will pay?
+    <br>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="senderRadio" id="sender-radio" value="option1" checked>
+        <label class="form-check-label" for="sender-radio">
+            Sender
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="receiverRadio" id="receiver-radio" value="option2">
+        <label class="form-check-label" for="receiver-radio">
+            Receiver
+        </label>
+    </div>
+    <div id = 'final-btn-wrapper'>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#order-data-modal" id = 'final-order'>Order</button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="order-data-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Body</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <%- include('common/footer'); -%>

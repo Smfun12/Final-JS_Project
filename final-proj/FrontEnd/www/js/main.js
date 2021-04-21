@@ -113,11 +113,12 @@ $(function () {
     let profilePage = require('./profile/profile');
     let orderPage = require('./orderPage/order');
     let payPage = require('./payments/payments');
+    let orderParamPage = require('./ordrParamPage/orderParamMain');
 
     archivePage.initializeArchive();
     payPage.initializePayments();
 });
-},{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./payments/payments":7,"./profile/profile":8,"./signUp/forSignUp":9,"./viewDeliveries/archive":10}],4:[function(require,module,exports){
+},{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./ordrParamPage/orderParamMain":6,"./payments/payments":8,"./profile/profile":9,"./signUp/forSignUp":10,"./viewDeliveries/archive":11}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 let nameCorrect = false;
@@ -234,6 +235,42 @@ exports.surname = $('#input-surname').value;
 exports.phone = $('#input-country-code').value + $('#input-phone').value;
 exports.planet = $('#planets').val();
 },{}],6:[function(require,module,exports){
+$('#input-cost').on('input', function() {
+    let val = $(this).val();
+    if (!parseEvaluatedCost(val)) {
+        $('#cost-success').hide();
+        $('#cost-failure').show();
+    } else {
+        $('#cost-success').show();
+        $('#cost-failure').hide();
+    }
+})
+
+function parseEvaluatedCost(input) {
+    let numVal;
+    try {
+        numVal = Number.parseInt(input);
+        if(numVal > 0 && numVal < 200000) return true;
+        return false;
+    } catch (err) {
+        return false;
+    }
+}
+
+$('#receiver-radio').on('click', function () {
+    if (!$(this).checked) {
+        $(this).prop('checked', true);
+        $('#sender-radio').prop('checked', false);
+    }
+})
+
+$('#sender-radio').on('click', function () {
+    if (!$(this).checked) {
+        $(this).prop('checked', true);
+        $('#receiver-radio').prop('checked', false);
+    }
+})
+},{}],7:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
         {
@@ -283,7 +320,7 @@ function getDeliveries() {
 }
 
 exports.getDeliveries = getDeliveries;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 const templates = require('../viewDeliveries/delTemp');
 const deliveriesList = require('./deliveriesForPay');
 const server = require('../API');
@@ -328,6 +365,15 @@ function initializePayments() {
         $('#is-paid').css('display', 'block');
     }
     for (let i = 0; i < deliveries.length; i++) {
+        deliveries[i] = {
+            description: deliveries[i].description,
+            date: deliveries[i].date,
+            cost: deliveries[i].cost,
+            status: deliveries[i].status,
+            destination: deliveries[i].destination,
+            fullStatus: deliveries[i].status,
+            fullDestination: deliveries[i].destination
+        }
         if(deliveries[i].status.length > 12) {
             deliveries[i].status = deliveries[i].status.substring(0, 9);
             deliveries[i].status += "...";
@@ -555,15 +601,17 @@ function sortByCostDesc(delivery1, delivery2) {
 function update () {
     $delList.html("");
     for (let i = 0; i < deliveries.length; i++) {
-        let html_code = templates.deliveryItem({
+        let $html_code = templates.deliveryItem({
             numId: i,
             description: deliveries[i].description,
             date: deliveries[i].date,
             cost: deliveries[i].cost,
             status: deliveries[i].status,
+            fullStatus: deliveries[i].fullStatus,
             destination: deliveries[i].destination,
+            fullDestination: deliveries[i].fullDestination
         });
-        $delList.append($(html_code));
+        $delList.append($html_code);
     }
 
     let n = deliveries.length;
@@ -586,7 +634,7 @@ function update () {
 }
 
 exports.initializePayments = initializePayments;
-},{"../API":1,"../viewDeliveries/delTemp":11,"./deliveriesForPay":6}],8:[function(require,module,exports){
+},{"../API":1,"../viewDeliveries/delTemp":12,"./deliveriesForPay":7}],9:[function(require,module,exports){
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
@@ -597,7 +645,7 @@ $("#sign_out").on('click', function () {
     window.location.href='http://localhost:3989';
 });
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -748,7 +796,7 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],10:[function(require,module,exports){
+},{"../API":1}],11:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
 
@@ -763,6 +811,15 @@ function initializeArchive() {
         $('#is-empty').css('display', 'block');
     }
     for (let i = 0; i < deliveries.length; i++) {
+        deliveries[i] = {
+            description: deliveries[i].description,
+            date: deliveries[i].date,
+            cost: deliveries[i].cost,
+            status: deliveries[i].status,
+            destination: deliveries[i].destination,
+            fullStatus: deliveries[i].status,
+            fullDestination: deliveries[i].destination
+        }
         if(deliveries[i].status.length > 12) {
             deliveries[i].status = deliveries[i].status.substring(0, 9);
             deliveries[i].status += "...";
@@ -773,15 +830,7 @@ function initializeArchive() {
         }
     }
     deliveries.sort(sortByStatusAsc);
-    update();
-
-    /*let n = deliveries.length;
-    for (let i = 0; i < n; i++) {
-        let id = '#item' + i;
-        $(id).on('click', function () {
-            alert(id);
-        });
-    }*/
+    updateArchive();
 }
 
 $('.slideup-for-sort').on('click', function () {
@@ -824,49 +873,49 @@ $('#status').on('click', function() {
 $('#date-arrow-down').on('click', function () {
     templateForArrowClick('date', 'down');
     deliveries.sort(sortByDateDesc);
-    update();
+    updateArchive();
 });
 
 $('#date-arrow-up').on('click', function () {
     templateForArrowClick('date', 'up');
     deliveries.sort(sortByDateAsc);
-    update();
+    updateArchive();
 });
 
 $('#status-arrow-down').on('click', function () {
    templateForArrowClick('status', 'down');
     deliveries.sort(sortByStatusDesc);
-    update();
+    updateArchive();
 });
 
 $('#status-arrow-up').on('click', function () {
     templateForArrowClick('status', 'up');
     deliveries.sort(sortByStatusAsc);
-    update();
+    updateArchive();
 });
 
 $('#dest-arrow-down').on('click', function () {
     templateForArrowClick('dest', 'down');
     deliveries.sort(sortByDestinationDesc);
-    update();
+    updateArchive();
 });
 
 $('#dest-arrow-up').on('click', function () {
     templateForArrowClick('dest', 'up');
     deliveries.sort(sortByDestinationAsc);
-    update();
+    updateArchive();
 });
 
 $('#cost-arrow-down').on('click', function () {
     templateForArrowClick('cost', 'down');
     deliveries.sort(sortByCostDesc);
-    update();
+    updateArchive();
 });
 
 $('#cost-arrow-up').on('click', function () {
     templateForArrowClick('cost', 'up');
     deliveries.sort(sortByCostAsc);
-    update();
+    updateArchive();
 });
 
 function templateForArrowClick(sortBy, dir) {
@@ -952,7 +1001,7 @@ function templateToSortByOtherVal(sortBy) {
     $('#main-arrow-down').css('display', 'none');
     $('#main-arrow-up').css('display', 'block');
 
-    update();
+    updateArchive();
 }
 
 function sortByStatusAsc(delivery1, delivery2) {
@@ -995,7 +1044,7 @@ function sortByCostDesc(delivery1, delivery2) {
     return -sortByCostAsc(delivery1, delivery2);
 }
 
-function update () {
+function updateArchive () {
     $delList.html("");
     for (let i = 0; i < deliveries.length; i++) {
         let html_code = templates.deliveryItem({
@@ -1004,23 +1053,75 @@ function update () {
             date: deliveries[i].date,
             cost: deliveries[i].cost,
             status: deliveries[i].status,
+            fullStatus: deliveries[i].fullStatus,
             destination: deliveries[i].destination,
+            fullDestination: deliveries[i].fullDestination
         });
         $delList.append($(html_code));
     }
 }
 
+$('[data-toggle="tooltip"]').tooltip();
+
 exports.initializeArchive = initializeArchive;
-},{"./delTemp":11,"./deliveriesList":12}],11:[function(require,module,exports){
+},{"./delTemp":12,"./deliveriesList":13}],12:[function(require,module,exports){
 
 const ejs = require('ejs');
 
-exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description'><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=date%></span></div>\r\n        <div class = 'item-cost'><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status'>Status: <%=status%></span>\r\n    <span class = 'item-dest'>Destination: <%=destination%></span>\r\n</div>");
-},{"ejs":14}],12:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],13:[function(require,module,exports){
+exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description'><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=date%></span></div>\r\n        <div class = 'item-cost'><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
+},{"ejs":15}],13:[function(require,module,exports){
+function getDeliveries() {
+    let deliveries = [
+        {
+            description: "Some description 0",
+            date: "Date 0",
+            cost: 100,
+            status: "Status 0",
+            destination: "Destination 0"
+        },
+        {
+            description: "Some description 1",
+            date: "Date 1",
+            cost: 10,
+            status: "some Status 1",
+            destination: "Destination 1"
+        },
+        {
+            description: "Some description 2",
+            date: "Date 2",
+            cost: 1,
+            status: "some Status 2",
+            destination: "some Destination 2"
+        },
+        {
+            description: "Some description 3",
+            date: "Date 3",
+            cost: 200,
+            status: "Status 3",
+            destination: "Destination 3"
+        },
+        {
+            description: "Some description 4",
+            date: "Date 4",
+            cost: 1,
+            status: "Status 4",
+            destination: "Destination 4"
+        },
+        {
+            description: "Some description 5",
+            date: "Date 5",
+            cost: 200,
+            status: "Status 5",
+            destination: "Destination 5",
+        }
+    ];
+    return deliveries;
+}
+
+exports.getDeliveries = getDeliveries;
+},{}],14:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],14:[function(require,module,exports){
+},{"dup":4}],15:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -1961,7 +2062,7 @@ if (typeof window != 'undefined') {
   window.ejs = exports;
 }
 
-},{"../package.json":16,"./utils":15,"fs":13,"path":17}],15:[function(require,module,exports){
+},{"../package.json":17,"./utils":16,"fs":14,"path":18}],16:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -2142,7 +2243,7 @@ exports.hyphenToCamel = function (str) {
   return str.replace(/-[a-z]/g, function (match) { return match[1].toUpperCase(); });
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports={
   "_from": "ejs@^3.1.6",
   "_id": "ejs@3.1.6",
@@ -2218,7 +2319,7 @@ module.exports={
   "version": "3.1.6"
 }
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -2751,7 +2852,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":18}],18:[function(require,module,exports){
+},{"_process":19}],19:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

@@ -42,6 +42,15 @@ function initializePayments() {
         $('#is-paid').css('display', 'block');
     }
     for (let i = 0; i < deliveries.length; i++) {
+        deliveries[i] = {
+            description: deliveries[i].description,
+            date: deliveries[i].date,
+            cost: deliveries[i].cost,
+            status: deliveries[i].status,
+            destination: deliveries[i].destination,
+            fullStatus: deliveries[i].status,
+            fullDestination: deliveries[i].destination
+        }
         if(deliveries[i].status.length > 12) {
             deliveries[i].status = deliveries[i].status.substring(0, 9);
             deliveries[i].status += "...";
@@ -269,15 +278,17 @@ function sortByCostDesc(delivery1, delivery2) {
 function update () {
     $delList.html("");
     for (let i = 0; i < deliveries.length; i++) {
-        let html_code = templates.deliveryItem({
+        let $html_code = templates.deliveryItem({
             numId: i,
             description: deliveries[i].description,
             date: deliveries[i].date,
             cost: deliveries[i].cost,
             status: deliveries[i].status,
+            fullStatus: deliveries[i].fullStatus,
             destination: deliveries[i].destination,
+            fullDestination: deliveries[i].fullDestination
         });
-        $delList.append($(html_code));
+        $delList.append($html_code);
     }
 
     let n = deliveries.length;

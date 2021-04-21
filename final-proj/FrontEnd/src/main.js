@@ -6,6 +6,7 @@ $(function () {
     let profilePage = require('./profile/profile');
     let orderPage = require('./orderPage/order');
     let payPage = require('./payments/payments');
+    let orderParamPage = require('./ordrParamPage/orderParamMain');
 
     archivePage.initializeArchive();
     payPage.initializePayments();
