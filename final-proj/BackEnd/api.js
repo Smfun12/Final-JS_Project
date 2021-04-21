@@ -10,7 +10,7 @@ const sql = "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
 const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
-    database: "js-project",
+    database: "js_project",
     password: "root",
     timezone: "local"
 });
@@ -32,6 +32,11 @@ exports.checkUserInSystem = function (req, res) {
         function (err, results, fields) {
             console.log(err);
             console.log(results);// собственно данные
+            if (results.length === 0){
+                console.log('Db is empty');
+                res.send([]);
+                return;
+            }
             console.log(results[0].password);
             console.log(user.password);
             if (results[0].email === user.email && bcrypt.compareSync(user.password, results[0].password)){
