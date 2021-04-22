@@ -16,7 +16,16 @@
         <label id="label-head-param"> Please enter the information about the delivery </label>
         <br><br>
     </div>
-    <div id="div-evaluated-cost">Evaluated cost (UAH):</div>
+    Estimated Weight (kg):
+    <div id = 'wrap-drag'>
+        <div class = 'noselect' id = 'zero'>0</div>
+        <div id = slide></div>
+        <div class = 'noselect' id = 'hundred'>100</div>
+        <div id = 'to-drag'></div>
+        <br>
+        <div id = 'weight-display'>Weight: <span id = 'weight-val'>0</span>kg</div>
+    </div>
+    <div id="div-evaluated-cost">Estimated cost (UAH):</div>
     <input class="form-control input-lg" id="input-cost" type="number" maxlength="6" placeholder="200">
     <div class="success" id="cost-success">Let it be.</div>
     <div class="failure" id="cost-failure">

@@ -27,7 +27,7 @@ function sendMail(name, surname, email) {
                 + code,
     })
         .then(function (message) {
-            alert("mail sent successfully")
+            //alert("mail sent successfully")
         });
     return code;
 }

@@ -14,6 +14,7 @@ const connection = mysql.createConnection({
     password: "root",
     timezone: "local"
 });
+
 connection.connect(function (err) {
     if (err) {
         return console.error("Ошибка: " + err.message);

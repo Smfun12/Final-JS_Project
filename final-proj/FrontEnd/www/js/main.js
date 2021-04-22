@@ -117,6 +117,7 @@ $(function () {
 
     archivePage.initializeArchive();
     payPage.initializePayments();
+    orderParamPage.initializeOrderParamPage();
 });
 },{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./ordrParamPage/orderParamMain":6,"./payments/payments":8,"./profile/profile":9,"./signUp/forSignUp":10,"./viewDeliveries/archive":11}],4:[function(require,module,exports){
 
@@ -235,6 +236,12 @@ exports.surname = $('#input-surname').value;
 exports.phone = $('#input-country-code').value + $('#input-phone').value;
 exports.planet = $('#planets').val();
 },{}],6:[function(require,module,exports){
+function initializeOrderParamPage() {
+    try{
+        positionRollbar();
+    } catch{}
+}
+
 $('#input-cost').on('input', function() {
     let val = $(this).val();
     if (!parseEvaluatedCost(val)) {
@@ -270,6 +277,95 @@ $('#sender-radio').on('click', function () {
         $('#receiver-radio').prop('checked', false);
     }
 })
+
+let ismousedown;
+jQuery.fn.draggit = function (el, doSmth) {
+    var thisdiv = this;
+    var thistarget = $(el);
+    var relX;
+    var targetw = thistarget.width();
+    //var docw;
+
+    thistarget.css('position','absolute');
+
+
+    thisdiv.bind('mousedown', function(e){
+        var pos = $(el).offset();
+        var srcX = pos.left;
+
+        //docw = $('body').width();
+
+        relX = e.pageX - srcX;
+
+        ismousedown = true;
+    });
+
+    $(document).bind('mousemove',function(e){
+        if(ismousedown)
+        {
+            targetw = thistarget.width();
+
+            let start = $('#slide').css('left');
+            start = start.slice(0, start.length - 2);
+            start = Number.parseInt(start);
+            //var maxX = docw - targetw - 10;
+            let minX = start - 10;
+            let maxX = minX + 200;
+
+            var mouseX = e.pageX;
+
+            var diffX = mouseX - relX;
+
+            // check if we are beyond document bounds ...
+            if(diffX < minX)   diffX = minX;
+            if(diffX > maxX) diffX = maxX;
+
+            $(el).css('left', (diffX)+'px');
+            doSmth(diffX);
+        }
+    });
+
+    $(window).bind('mouseup', function(e){
+        ismousedown = false;
+    });
+
+    return this;
+} // end jQuery draggit function //
+
+function changeWeightLabel(coordX) {
+    let start = $('#slide').css('left');
+    start = start.slice(0, start.length - 2);
+    start = Number.parseInt(start);
+    let w = Number.parseInt((coordX + 10 - start) / 2);
+    $('#weight-val').text(w);
+}
+
+$('#wrap-drag').draggit('#to-drag', changeWeightLabel);
+
+$('#slide').on('click', function (e) {
+    $('#to-drag').css('left', (e.pageX)+'px');
+    changeWeightLabel(e.pageX);
+})
+
+$(window).on('resize', function () {
+    try {
+        positionRollbar();
+    }
+    catch (err){}
+})
+
+function positionRollbar() {
+    let left = $('.container').css('margin-left');
+    left = left.slice(0, left.length - 2);
+    left = Number.parseInt(left);
+    left += 50;
+    $('#slide').css('left', left + 'px');
+    $('#zero').css('left', left - 30 + 'px');
+    $('#hundred').css('left', left + 220 + 'px');
+    $('#to-drag').css('left', left - 10 + 'px');
+}
+
+exports.initializeOrderParamPage = initializeOrderParamPage;
 },{}],7:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
@@ -675,7 +771,7 @@ function sendMail(name, surname, email) {
                 + code,
     })
         .then(function (message) {
-            alert("mail sent successfully")
+            //alert("mail sent successfully")
         });
     return code;
 }
@@ -1068,7 +1164,7 @@ exports.initializeArchive = initializeArchive;
 
 const ejs = require('ejs');
 
-exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description'><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=date%></span></div>\r\n        <div class = 'item-cost'><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
+exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=description%>\"><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=date%>\"><span><%=date%></span></div>\r\n        <div class = 'item-cost' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=cost%>₴\"><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
 },{"ejs":15}],13:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [

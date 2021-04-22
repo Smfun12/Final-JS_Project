@@ -10,4 +10,5 @@ $(function () {
 
     archivePage.initializeArchive();
     payPage.initializePayments();
+    orderParamPage.initializeOrderParamPage();
 });

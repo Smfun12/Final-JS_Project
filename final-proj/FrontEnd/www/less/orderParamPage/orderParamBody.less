@@ -55,3 +55,61 @@ input{
 .modal-content{
   margin-top: 200px;
 }
+
+#wrap-drag{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  height: 75px;
+}
+
+@offset: 10vw;
+
+#zero{
+  display: inline-block;
+  //float: left;
+  position: absolute;
+  left: 60px + @offset;
+  top: 215px;
+}
+
+#slide{
+  //margin: 13px 20px 0px 20px;
+  position: absolute;
+  left: 90px + @offset;
+  top: 230px;
+  width: 200px;
+  height: 0px;
+  border: 2px solid brown;
+  float: left;
+  cursor: pointer;
+}
+
+#hundred{
+  display: inline-block;
+  //float: left;
+  position: absolute;
+  left: 310px + @offset;
+  top: 215px;
+}
+
+#to-drag{
+  cursor: pointer;
+  box-sizing: border-box;
+  border-radius: 50%;
+  position: absolute;
+  left: 80px + @offset;
+  top: 220px;
+  background-color: brown;
+  width: 20px;
+  height: 20px;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
