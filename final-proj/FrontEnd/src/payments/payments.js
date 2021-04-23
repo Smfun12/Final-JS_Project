@@ -36,7 +36,7 @@ function liqpay(data) {
     });
 }
 
-function initializePayments() {
+/*function initializePayments() {
     deliveries = deliveriesList.getDeliveries();
     if (deliveries.length === 0) {
         $('#is-paid').css('display', 'block');
@@ -62,6 +62,52 @@ function initializePayments() {
     }
     deliveries.sort(sortByStatusAsc);
     update();
+}*/
+
+function initializePayments() {
+    let user = JSON.parse(sessionStorage.getItem('user'));
+    //console.log(user);
+    server.getDeliveries(user, function (err, data) {
+        deliveries = [];
+        if (err) {
+            console.log(err.toString());
+        } else {
+            deliveries = data;
+        }
+        //console.log(deliveries);
+        if (deliveries.length === 0) {
+            $('#is-empty').css('display', 'block');
+        }
+        let j = 0;
+        while (j < deliveries.length) {
+            if (deliveries[j].payer !== "sender" || deliveries[j].paid === 'true') {
+                deliveries.splice(j, 1);
+            } else {
+                j++;
+            }
+        }
+        for (let i = 0; i < deliveries.length; i++) {
+            deliveries[i] = {
+                description: deliveries[i].description ? deliveries[i].description : "No description",
+                date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
+                cost: deliveries[i].cost,
+                status: deliveries[i].status ? deliveries[i].status : "No Status",
+                destination: deliveries[i].destination,
+                fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
+                fullDestination: deliveries[i].destination
+            }
+            if(deliveries[i].status.length > 12) {
+                deliveries[i].status = deliveries[i].status.substring(0, 9);
+                deliveries[i].status += "...";
+            }
+            if(deliveries[i].destination.length > 14) {
+                deliveries[i].destination = deliveries[i].destination.substring(0, 11);
+                deliveries[i].destination += "...";
+            }
+        }
+        deliveries.sort(sortByStatusAsc);
+        update();
+    });
 }
 
 $('.slideup-for-sort').on('click', function () {

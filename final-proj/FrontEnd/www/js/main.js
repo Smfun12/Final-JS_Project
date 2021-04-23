@@ -46,8 +46,15 @@ exports.createUser = function (user, call_back) {
 
 exports.createPayment = function(payment_info, callback) {
     backendPost("/api/create-payment/", payment_info, callback);
-};
+}
 
+exports.getDeliveries = function (user, callback) {
+    backendPost('/api/get-deliveries/', user, callback);
+}
+
+exports.createDelivery = function (data, callback) {
+    backendPost('/api/create-delivery/', data, callback);
+}
 },{}],2:[function(require,module,exports){
 let API =require('../API');
 
@@ -455,7 +462,7 @@ function liqpay(data) {
     });
 }
 
-function initializePayments() {
+/*function initializePayments() {
     deliveries = deliveriesList.getDeliveries();
     if (deliveries.length === 0) {
         $('#is-paid').css('display', 'block');
@@ -481,6 +488,52 @@ function initializePayments() {
     }
     deliveries.sort(sortByStatusAsc);
     update();
+}*/
+
+function initializePayments() {
+    let user = JSON.parse(sessionStorage.getItem('user'));
+    //console.log(user);
+    server.getDeliveries(user, function (err, data) {
+        deliveries = [];
+        if (err) {
+            console.log(err.toString());
+        } else {
+            deliveries = data;
+        }
+        //console.log(deliveries);
+        if (deliveries.length === 0) {
+            $('#is-empty').css('display', 'block');
+        }
+        let j = 0;
+        while (j < deliveries.length) {
+            if (deliveries[j].payer !== "sender" || deliveries[j].paid === 'true') {
+                deliveries.splice(j, 1);
+            } else {
+                j++;
+            }
+        }
+        for (let i = 0; i < deliveries.length; i++) {
+            deliveries[i] = {
+                description: deliveries[i].description ? deliveries[i].description : "No description",
+                date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
+                cost: deliveries[i].cost,
+                status: deliveries[i].status ? deliveries[i].status : "No Status",
+                destination: deliveries[i].destination,
+                fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
+                fullDestination: deliveries[i].destination
+            }
+            if(deliveries[i].status.length > 12) {
+                deliveries[i].status = deliveries[i].status.substring(0, 9);
+                deliveries[i].status += "...";
+            }
+            if(deliveries[i].destination.length > 14) {
+                deliveries[i].destination = deliveries[i].destination.substring(0, 11);
+                deliveries[i].destination += "...";
+            }
+        }
+        deliveries.sort(sortByStatusAsc);
+        update();
+    });
 }
 
 $('.slideup-for-sort').on('click', function () {
@@ -895,13 +948,14 @@ function parsePwd(password){
 },{"../API":1}],11:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
+const serverInteract = require('../API');
 
 let viewOptions = false;
 let curSort = "status";
 let $delList = $("#add-deliveries");
 let deliveries;
 
-function initializeArchive() {
+/*function initializeArchive() {
     deliveries = deliveriesList.getDeliveries();
     if (deliveries.length === 0) {
         $('#is-empty').css('display', 'block');
@@ -927,6 +981,44 @@ function initializeArchive() {
     }
     deliveries.sort(sortByStatusAsc);
     updateArchive();
+}*/
+
+function initializeArchive() {
+    let user = JSON.parse(sessionStorage.getItem('user'));
+    //console.log(user);
+    serverInteract.getDeliveries(user, function (err, data) {
+        deliveries = [];
+        if (err) {
+            console.log(err.toString());
+        } else {
+            deliveries = data;
+        }
+        //console.log(deliveries);
+        if (deliveries.length === 0) {
+            $('#is-empty').css('display', 'block');
+        }
+        for (let i = 0; i < deliveries.length; i++) {
+            deliveries[i] = {
+                description: deliveries[i].description ? deliveries[i].description : "No description",
+                date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
+                cost: deliveries[i].cost,
+                status: deliveries[i].status ? deliveries[i].status : "No Status",
+                destination: deliveries[i].destination,
+                fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
+                fullDestination: deliveries[i].destination
+            }
+            if(deliveries[i].status.length > 12) {
+                deliveries[i].status = deliveries[i].status.substring(0, 9);
+                deliveries[i].status += "...";
+            }
+            if(deliveries[i].destination.length > 14) {
+                deliveries[i].destination = deliveries[i].destination.substring(0, 11);
+                deliveries[i].destination += "...";
+            }
+        }
+        deliveries.sort(sortByStatusAsc);
+        updateArchive();
+    });
 }
 
 $('.slideup-for-sort').on('click', function () {
@@ -1144,7 +1236,7 @@ function updateArchive () {
     $delList.html("");
     for (let i = 0; i < deliveries.length; i++) {
         let html_code = templates.deliveryItem({
-            numId: -1,
+            numId: -(i + 1),
             description: deliveries[i].description,
             date: deliveries[i].date,
             cost: deliveries[i].cost,
@@ -1155,12 +1247,33 @@ function updateArchive () {
         });
         $delList.append($(html_code));
     }
+
+    let n = deliveries.length;
+    for (let i = 0; i < n; i++) {
+        let id = "#item-" + (i + 1);
+        let curDel = $(id);
+        curDel.attr('data-toggle', 'modal');
+        curDel.attr('data-target', '#delivery-info');
+        /*$(id).on('click', function () {
+            //console.log("id: ", id);
+            let desc = "Payment info" +
+                "\r\nDescription: " + deliveries[i].description +
+                "\r\nDate: " + deliveries[i].date +
+                "\r\nStatus: " + deliveries[i].status + '.';
+            let payment_info = {
+                amount: deliveries[i].cost,
+                description: desc,
+            };
+            indexToSplice = i;
+            server.createPayment(payment_info, postInfo);
+        });*/
+    }
 }
 
 $('[data-toggle="tooltip"]').tooltip();
 
 exports.initializeArchive = initializeArchive;
-},{"./delTemp":12,"./deliveriesList":13}],12:[function(require,module,exports){
+},{"../API":1,"./delTemp":12,"./deliveriesList":13}],12:[function(require,module,exports){
 
 const ejs = require('ejs');
 

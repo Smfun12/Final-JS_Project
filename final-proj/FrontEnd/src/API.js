@@ -45,4 +45,12 @@ exports.createUser = function (user, call_back) {
 
 exports.createPayment = function(payment_info, callback) {
     backendPost("/api/create-payment/", payment_info, callback);
-};
+}
+
+exports.getDeliveries = function (user, callback) {
+    backendPost('/api/get-deliveries/', user, callback);
+}
+
+exports.createDelivery = function (data, callback) {
+    backendPost('/api/create-delivery/', data, callback);
+}

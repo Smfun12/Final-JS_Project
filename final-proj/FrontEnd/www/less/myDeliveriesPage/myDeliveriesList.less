@@ -3,6 +3,7 @@
 @paddingVertical: 6px;
 @total-height: 73px;
 .del-list{
+  cursor: pointer;
   box-sizing: border-box;
   height: @total-height;
   margin-left: @marginSide;
@@ -60,4 +61,24 @@
 
 #add-deliveries{
   margin-top: 50px;
+}
+
+.fade:not(.show) {
+  opacity: 0.5 !important;
+}
+
+#delivery-info{
+  opacity: 1 !important;
+}
+
+.modal-content{
+  margin-top: 200px;
+}
+
+#position-cost{
+  font-size: 18px;
+  position: absolute;
+  bottom: 10px;
+  right: 0px;
+  width: 70px;
 }

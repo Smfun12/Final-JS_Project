@@ -13,6 +13,8 @@ function configureEndpoints(app) {
     //Налаштування URL за якими буде відповідати сервер
     //app.get('/api/get-pizza-list/', api.getPizzaList);
     app.post('/api/create-payment/', api.createPayment);
+    app.post('/api/get-deliveries/', api.getDeliveries);
+    app.post('/api/create-delivery/', api.createDelivery);
 
     //Сторінки
     //Головна сторінка
