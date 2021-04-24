@@ -114,11 +114,14 @@ $(function () {
     let orderPage = require('./orderPage/order');
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
+    let shopPage = require('./shop/shop');
+    let productCart = require('./productCart/Cart');
 
     archivePage.initializeArchive();
     payPage.initializePayments();
+    shopPage.initializeProducts();
 });
-},{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./ordrParamPage/orderParamMain":6,"./payments/payments":8,"./profile/profile":9,"./signUp/forSignUp":10,"./viewDeliveries/archive":11}],4:[function(require,module,exports){
+},{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./ordrParamPage/orderParamMain":6,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./shop/shop":12,"./signUp/forSignUp":13,"./viewDeliveries/archive":14}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 let nameCorrect = false;
@@ -634,7 +637,60 @@ function update () {
 }
 
 exports.initializePayments = initializePayments;
-},{"../API":1,"../viewDeliveries/delTemp":12,"./deliveriesForPay":7}],9:[function(require,module,exports){
+},{"../API":1,"../viewDeliveries/delTemp":15,"./deliveriesForPay":7}],9:[function(require,module,exports){
+let templates = require('../viewDeliveries/delTemp');
+
+let Cart = []
+let sum = 0;
+
+function addToCart(product){
+    if (!containsObject(product,Cart)) {
+        Cart.push({
+            quantity: 1,
+            product: product
+        });
+    }
+    else{
+        console.log('exist');
+    }
+    sum = 0;
+    for (let i = 0; i < Cart.length;i++){
+        sum += Cart[i].product.cost * Cart[i].quantity;
+    }
+    $('#cart-len').text(Cart.length);
+    console.log(Cart);
+}
+function containsObject(obj, list) {
+    let i;
+    for (i = 0; i < list.length; i++) {
+        if (list[i].product.id === obj.id) {
+            list[i].quantity++;
+            return true;
+        }
+    }
+
+    return false;
+}
+let $modalText = $('.modal-body');
+
+function showProductInCart() {
+    $modalText.html('');
+
+    $("#totalSum").text(sum);
+    function showOneProductInCart(product) {
+        let html_code =templates.cartItem({product:product});
+        let $node = $(html_code);
+
+        $modalText.append($node);
+    }
+    Cart.forEach(showOneProductInCart);
+    console.log($modalText);
+}
+exports.showProductInCart = showProductInCart;
+exports.addToCart = addToCart;
+
+
+},{"../viewDeliveries/delTemp":15}],10:[function(require,module,exports){
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
@@ -645,7 +701,142 @@ $("#sign_out").on('click', function () {
     window.location.href='http://localhost:3989';
 });
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+function getProducts() {
+    let products = [
+        {
+            id: 1,
+            description: "Some description 0",
+            date: "Date 0",
+            cost: 100,
+            status: "Status 0",
+            icon:'../images/klein.jpg',
+        },
+        {
+            id: 2,
+            description: "Some description 1",
+            date: "Date 1",
+            cost: 10,
+            status: "Status 1",
+            icon:'./images/cube.png',
+        },
+        {
+            id: 3,
+            description: "Some description 2",
+            date: "Date 2",
+            cost: 1,
+            status: "Status 2",
+            icon:'../images/mebius.jpg',
+        },
+        {
+            id: 4,
+            description: "Some description 3",
+            date: "Date 3",
+            cost: 200,
+            status: "Status 3",
+            icon:'../images/mebius.jpg',
+        },
+        {
+            id: 5,
+            description: "Some description 4",
+            date: "Date 4",
+            cost: 1,
+            status: "Status 4",
+            icon:'./images/mebius.jpg',
+        },
+        {
+            id: 6,
+            description: "Some description 5",
+            date: "Date 5",
+            cost: 200,
+            status: "Status 5",
+            icon:'../images/mebius.jpg',
+        }
+    ];
+    return products;
+}
+
+exports.getProducts = getProducts;
+},{}],12:[function(require,module,exports){
+let products = require('../shop/products');
+let $products = $('#products');
+const templates = require('../viewDeliveries/delTemp');
+const PizzaCart = require('../productCart/Cart');
+let productList = []
+function initializeProducts() {
+    productList = products.getProducts();
+    if (products.length === 0) {
+        $('#is-paid').css('display', 'block');
+    }
+    for (let i = 0; i < productList.length; i++) {
+        productList[i] = {
+            id: productList[i].id,
+            description: productList[i].description,
+            date: productList[i].date,
+            cost: productList[i].cost,
+            status: productList[i].status,
+            icon: productList[i].icon,
+            fullStatus: productList[i].status,
+        }
+        if(productList[i].status.length > 12) {
+            productList[i].status = productList[i].status.substring(0, 9);
+            productList[i].status += "...";
+        }
+    }
+    productList.sort(sortByStatusAsc);
+    update();
+}
+function sortByStatusAsc(product1, product2) {
+    if (product1.status < product2.status) return -1;
+    else if (product1.status === product2.status) return 0;
+    else return 1;
+}
+
+function sortByStatusDesc(delivery1, delivery2) {
+    return -sortByStatusAsc(delivery1, delivery2);
+}
+
+function update () {
+    $products.html("");
+    function showOneProduct(product){
+        let html_code =templates.shopIitem({product:product});
+        let $node = $(html_code);
+
+        $node.find('.buyProduct').click(function () {
+            PizzaCart.addToCart(product);
+        });
+        $products.append($node);
+        }
+
+    productList.forEach(showOneProduct);
+
+}
+
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+let $modal = $('#myModal');
+// When the user clicks on the button, open the modal
+$('#basket').click(function () {
+   $modal.css('display','block');
+   PizzaCart.showProductInCart();
+});
+
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    $modal.css('display','none');
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target === $modal) {
+        $modal.css('display','none');
+    }
+}
+
+exports.initializeProducts = initializeProducts;
+},{"../productCart/Cart":9,"../shop/products":11,"../viewDeliveries/delTemp":15}],13:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -796,7 +987,7 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],11:[function(require,module,exports){
+},{"../API":1}],14:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
 
@@ -1064,12 +1255,16 @@ function updateArchive () {
 $('[data-toggle="tooltip"]').tooltip();
 
 exports.initializeArchive = initializeArchive;
-},{"./delTemp":12,"./deliveriesList":13}],12:[function(require,module,exports){
+},{"./delTemp":15,"./deliveriesList":16}],15:[function(require,module,exports){
 
 const ejs = require('ejs');
 
 exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description'><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=date%></span></div>\r\n        <div class = 'item-cost'><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
-},{"ejs":15}],13:[function(require,module,exports){
+
+exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=product.fullStatus%>\">Status: <%=product.status%></span>\r\n    <button class=\"buyProduct\">Buy</button>\r\n</div>");
+
+exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n</div>");
+},{"ejs":18}],16:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
         {
@@ -1119,9 +1314,9 @@ function getDeliveries() {
 }
 
 exports.getDeliveries = getDeliveries;
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],15:[function(require,module,exports){
+},{"dup":4}],18:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -2062,7 +2257,7 @@ if (typeof window != 'undefined') {
   window.ejs = exports;
 }
 
-},{"../package.json":17,"./utils":16,"fs":14,"path":18}],16:[function(require,module,exports){
+},{"../package.json":20,"./utils":19,"fs":17,"path":21}],19:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -2243,7 +2438,7 @@ exports.hyphenToCamel = function (str) {
   return str.replace(/-[a-z]/g, function (match) { return match[1].toUpperCase(); });
 };
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports={
   "_from": "ejs@^3.1.6",
   "_id": "ejs@3.1.6",
@@ -2319,7 +2514,7 @@ module.exports={
   "version": "3.1.6"
 }
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -2852,7 +3047,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":19}],19:[function(require,module,exports){
+},{"_process":22}],22:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

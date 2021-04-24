@@ -3,12 +3,32 @@
 <!-- Написати: <link rel="stylesheet/less" type="text/css" href="less/***.less" /> -->
 <!-- Якщо треба navbar => @import "navbar"; -->
 <!-- Приклад -->
-<link rel="stylesheet/less" type="text/css" href="less/main.less" />
+<link rel="stylesheet/less" type="text/css" href="less/shopPage/shop.less" />
 <!-- Приклад -->
 <!-- LESS JavaScript компілятор -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js"></script>
 </head>
 <body>
 <%- include('common/navbar'); -%>
+<div id="myModal" class="modal">
 
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h2>Modal Header</h2>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div style="text-align: right"><img src="./images/tesseract.gif" alt="" id="hypercube">
+        </div>
+        <div class="modal-footer">
+            <h3>Total sum:</h3>
+            <span id="totalSum"></span>
+            <span>$</span>
+        </div>
+    </div>
+
+</div>
+<div class="row" id = "products"></div>
 <%- include('common/footer'); -%>
