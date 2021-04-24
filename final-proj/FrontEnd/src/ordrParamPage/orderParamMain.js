@@ -16,6 +16,26 @@ today = yyyy + '-' + mm + '-' + dd;
 
 let payer = "Sender";
 
+function showGif() {
+    if (storage.get('destination') === 'mercury') {
+        $('#mercury-gif').show();
+    } else if (storage.get('destination') === 'venus') {
+        $('#venus-gif').show();
+    } else if (storage.get('destination') === 'earth') {
+        $('#earth-gif').show();
+    } else if (storage.get('destination') === 'mars') {
+        $('#mars-gif').show();
+    } else if (storage.get('destination') === 'jupiter') {
+        $('#jupiter-gif').show();
+    } else if (storage.get('destination') === 'saturn') {
+        $('#saturn-gif').show();
+    } else if (storage.get('destination') === 'uranus') {
+        $('#uranus-gif').show();
+    } else if (storage.get('destination') === 'neptune') {
+        $('#neptune-gif').show();
+    }
+}
+
 $('#input-cost').on('input', function() {
     let val = $(this).val();
     if (!parseEvaluatedCost(val)) {
@@ -185,3 +205,4 @@ $('#btn-order').click(function () {
 });
 
 exports.initializeOrderParamPage = initializeOrderParamPage;
+exports.showGif = showGif;

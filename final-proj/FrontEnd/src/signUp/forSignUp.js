@@ -2,6 +2,7 @@ let firstname;
 let lastname;
 let address;
 let code;
+let codeResent = 0;
 
 let API = require('../API');
 
@@ -13,7 +14,7 @@ function getRandomInt(min, max) {
 }
 
 function sendMail(name, surname, email) {
-    const code = getRandomInt(0, 9999);
+    const code = getRandomInt(1000, 9999);
     Email.send({
         Host: "smtp.gmail.com",
         Username: "universal.delivery.noreply@gmail.com",
@@ -31,6 +32,17 @@ function sendMail(name, surname, email) {
         });
     return code;
 }
+
+$('#resend').click(function () {
+    let name = $('#input-name').val();
+    name = trim(name);
+    let surname = $('#input-surname').val();
+    surname = trim(surname);
+    let email = $('#input-email').val();
+    email = trim(email);
+    codeResent = sendMail(name, surname, email);
+    alert("Code recent successfully! Please check your email again")
+});
 
 $('#sign-up-btn').on('click', function () {
     $('#format-request').hide();
@@ -73,6 +85,7 @@ $('#move-signup').on('click', function () {
         } else {
             $('#learn-email').hide();
             $('#validate-email').show();
+            $('#resend').show();
             address = email;
             code = sendMail(firstname, lastname, address);
             user.email = email;
@@ -80,10 +93,14 @@ $('#move-signup').on('click', function () {
 
     } else if ($('#validate-email').css('display') !== 'none') {
         let number = Number.parseInt($('#input-code').val());
+        if (codeResent) {
+            code = codeResent;
+        }
         if(number !== code) {
             $('#invalid-code').show();
         } else {
             $('#validate-email').hide();
+            $('#resend').hide();
             $('#learn-password').show();
         }
 

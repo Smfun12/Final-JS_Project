@@ -15,4 +15,5 @@ $(function () {
 
     }
     orderParamPage.initializeOrderParamPage();
+    orderParamPage.showGif();
 });

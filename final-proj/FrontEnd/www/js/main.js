@@ -138,6 +138,7 @@ $(function () {
 
     }
     orderParamPage.initializeOrderParamPage();
+    orderParamPage.showGif();
 });
 },{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":9,"./profile/profile":10,"./signUp/forSignUp":11,"./viewDeliveries/archive":12}],5:[function(require,module,exports){
 $('#my-dels').click(function () {
@@ -326,6 +327,26 @@ today = yyyy + '-' + mm + '-' + dd;
 
 let payer = "Sender";
 
+function showGif() {
+    if (storage.get('destination') === 'mercury') {
+        $('#mercury-gif').show();
+    } else if (storage.get('destination') === 'venus') {
+        $('#venus-gif').show();
+    } else if (storage.get('destination') === 'earth') {
+        $('#earth-gif').show();
+    } else if (storage.get('destination') === 'mars') {
+        $('#mars-gif').show();
+    } else if (storage.get('destination') === 'jupiter') {
+        $('#jupiter-gif').show();
+    } else if (storage.get('destination') === 'saturn') {
+        $('#saturn-gif').show();
+    } else if (storage.get('destination') === 'uranus') {
+        $('#uranus-gif').show();
+    } else if (storage.get('destination') === 'neptune') {
+        $('#neptune-gif').show();
+    }
+}
+
 $('#input-cost').on('input', function() {
     let val = $(this).val();
     if (!parseEvaluatedCost(val)) {
@@ -495,6 +516,7 @@ $('#btn-order').click(function () {
 });
 
 exports.initializeOrderParamPage = initializeOrderParamPage;
+exports.showGif = showGif;
 },{"../API":1,"../localStorage":2}],8:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
@@ -921,6 +943,7 @@ let firstname;
 let lastname;
 let address;
 let code;
+let codeResent = 0;
 
 let API = require('../API');
 
@@ -932,7 +955,7 @@ function getRandomInt(min, max) {
 }
 
 function sendMail(name, surname, email) {
-    const code = getRandomInt(0, 9999);
+    const code = getRandomInt(1000, 9999);
     Email.send({
         Host: "smtp.gmail.com",
         Username: "universal.delivery.noreply@gmail.com",
@@ -950,6 +973,17 @@ function sendMail(name, surname, email) {
         });
     return code;
 }
+
+$('#resend').click(function () {
+    let name = $('#input-name').val();
+    name = trim(name);
+    let surname = $('#input-surname').val();
+    surname = trim(surname);
+    let email = $('#input-email').val();
+    email = trim(email);
+    codeResent = sendMail(name, surname, email);
+    alert("Code recent successfully! Please check your email again")
+});
 
 $('#sign-up-btn').on('click', function () {
     $('#format-request').hide();
@@ -992,6 +1026,7 @@ $('#move-signup').on('click', function () {
         } else {
             $('#learn-email').hide();
             $('#validate-email').show();
+            $('#resend').show();
             address = email;
             code = sendMail(firstname, lastname, address);
             user.email = email;
@@ -999,10 +1034,14 @@ $('#move-signup').on('click', function () {
 
     } else if ($('#validate-email').css('display') !== 'none') {
         let number = Number.parseInt($('#input-code').val());
+        if (codeResent) {
+            code = codeResent;
+        }
         if(number !== code) {
             $('#invalid-code').show();
         } else {
             $('#validate-email').hide();
+            $('#resend').hide();
             $('#learn-password').show();
         }
 
