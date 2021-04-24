@@ -12,12 +12,8 @@ var today = new Date();
 var dd = String(today.getDate()).padStart(2, '0');
 var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 var yyyy = today.getFullYear();
-
-// today = mm + '/' + dd + '/' + yyyy;
 today = yyyy + '-' + mm + '-' + dd;
-// document.write(today);
 
-// let payer = ($('#sender-radio').is(':checked')) ? "Sender" : "Receiver";
 let payer = "Sender";
 
 $('#input-cost').on('input', function() {
@@ -45,18 +41,15 @@ function parseEvaluatedCost(input) {
 }
 
 $('#receiver-radio').on('click', function () {
-    // if (!$(this).checked) {
-        $(this).prop('checked', true);
-        $('#sender-radio').prop('checked', false);
-    // }
+    $(this).prop('checked', true);
+    $('#sender-radio').prop('checked', false);
+
     payer = "Receiver";
 })
 
 $('#sender-radio').on('click', function () {
-    // if (!$(this).checked) {
-        $(this).prop('checked', true);
-        $('#receiver-radio').prop('checked', false);
-    // }
+    $(this).prop('checked', true);
+    $('#receiver-radio').prop('checked', false);
     payer = "Sender";
 })
 
@@ -69,10 +62,10 @@ $('#final-order').click(function () {
         weight: $('#weight-val').text(),
         description: $('#text-desc').val(),
         date: today,
-        cost: $('#input-cost').val(),
+        cost: $('#input-cost').val() * 10 + Number.parseInt($('#weight-val').text()) * 5 + 500,
         status: "sent",
         payer: payer,
-        paid: false
+        paid: "false"
     };
 
     orderData = data;
@@ -95,7 +88,6 @@ jQuery.fn.draggit = function (el, doSmth) {
     var thistarget = $(el);
     var relX;
     var targetw = thistarget.width();
-    //var docw;
 
     thistarget.css('position','absolute');
 
@@ -103,8 +95,6 @@ jQuery.fn.draggit = function (el, doSmth) {
     thisdiv.bind('mousedown', function(e){
         var pos = $(el).offset();
         var srcX = pos.left;
-
-        //docw = $('body').width();
 
         relX = e.pageX - srcX;
 
@@ -119,7 +109,6 @@ jQuery.fn.draggit = function (el, doSmth) {
             let start = $('#slide').css('left');
             start = start.slice(0, start.length - 2);
             start = Number.parseInt(start);
-            //var maxX = docw - targetw - 10;
             let minX = start - 10;
             let maxX = minX + 200;
 

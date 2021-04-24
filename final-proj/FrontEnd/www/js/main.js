@@ -140,6 +140,14 @@ $(function () {
     orderParamPage.initializeOrderParamPage();
 });
 },{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":9,"./profile/profile":10,"./signUp/forSignUp":11,"./viewDeliveries/archive":12}],5:[function(require,module,exports){
+$('#my-dels').click(function () {
+    window.location.href = 'http://localhost:3989/archive.html';
+});
+
+$('#my-dels-txt').click(function () {
+    $('#my-dels').click();
+});
+
 $('#new-del').click(function () {
     if (sessionStorage.getItem('user') === null) {
         window.location.href = 'http://localhost:3989/signup.html';
@@ -147,6 +155,36 @@ $('#new-del').click(function () {
     else {
         window.location.href = 'http://localhost:3989/order.html';
     }
+});
+
+$('#new-del-txt').click(function () {
+    $('#new-del').click();
+});
+
+$('#mini-shop').click(function () {
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/shop.html';
+    }
+});
+
+$('#mini-shop-txt').click(function () {
+    $('#mini-shop').click();
+});
+
+$('#pay').click(function () {
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/payment.html';
+    }
+});
+
+$('#pay-txt').click(function () {
+    $('#pay').click();
 });
 },{}],6:[function(require,module,exports){
 let nameCorrect = false;
@@ -284,12 +322,8 @@ var today = new Date();
 var dd = String(today.getDate()).padStart(2, '0');
 var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 var yyyy = today.getFullYear();
-
-// today = mm + '/' + dd + '/' + yyyy;
 today = yyyy + '-' + mm + '-' + dd;
-// document.write(today);
 
-// let payer = ($('#sender-radio').is(':checked')) ? "Sender" : "Receiver";
 let payer = "Sender";
 
 $('#input-cost').on('input', function() {
@@ -317,18 +351,15 @@ function parseEvaluatedCost(input) {
 }
 
 $('#receiver-radio').on('click', function () {
-    // if (!$(this).checked) {
-        $(this).prop('checked', true);
-        $('#sender-radio').prop('checked', false);
-    // }
+    $(this).prop('checked', true);
+    $('#sender-radio').prop('checked', false);
+
     payer = "Receiver";
 })
 
 $('#sender-radio').on('click', function () {
-    // if (!$(this).checked) {
-        $(this).prop('checked', true);
-        $('#receiver-radio').prop('checked', false);
-    // }
+    $(this).prop('checked', true);
+    $('#receiver-radio').prop('checked', false);
     payer = "Sender";
 })
 
@@ -341,10 +372,10 @@ $('#final-order').click(function () {
         weight: $('#weight-val').text(),
         description: $('#text-desc').val(),
         date: today,
-        cost: $('#input-cost').val(),
+        cost: $('#input-cost').val() * 10 + Number.parseInt($('#weight-val').text()) * 5 + 500,
         status: "sent",
         payer: payer,
-        paid: false
+        paid: "false"
     };
 
     orderData = data;
@@ -367,7 +398,6 @@ jQuery.fn.draggit = function (el, doSmth) {
     var thistarget = $(el);
     var relX;
     var targetw = thistarget.width();
-    //var docw;
 
     thistarget.css('position','absolute');
 
@@ -375,8 +405,6 @@ jQuery.fn.draggit = function (el, doSmth) {
     thisdiv.bind('mousedown', function(e){
         var pos = $(el).offset();
         var srcX = pos.left;
-
-        //docw = $('body').width();
 
         relX = e.pageX - srcX;
 
@@ -391,7 +419,6 @@ jQuery.fn.draggit = function (el, doSmth) {
             let start = $('#slide').css('left');
             start = start.slice(0, start.length - 2);
             start = Number.parseInt(start);
-            //var maxX = docw - targetw - 10;
             let minX = start - 10;
             let maxX = minX + 200;
 
