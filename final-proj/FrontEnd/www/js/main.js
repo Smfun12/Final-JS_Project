@@ -46,9 +46,29 @@ exports.createUser = function (user, call_back) {
 
 exports.createPayment = function(payment_info, callback) {
     backendPost("/api/create-payment/", payment_info, callback);
-};
+}
 
+exports.getDeliveries = function (user, callback) {
+    backendPost('/api/get-deliveries/', user, callback);
+}
+
+exports.createDelivery = function (data, callback) {
+    backendPost('/api/create-delivery/', data, callback);
+}
+
+exports.modifyDelivery = function (data, callback) {
+    backendPost('/api/modify-delivery/', data, callback);
+}
 },{}],2:[function(require,module,exports){
+var basil = require('basil.js');
+basil = new basil();
+exports.get = function (key) {
+    return basil.get(key);
+};
+exports.set = function (key, value) {
+    return basil.set(key, value);
+};
+},{"basil.js":14}],3:[function(require,module,exports){
 let API =require('../API');
 
 function parseEmail(email) {
@@ -104,7 +124,7 @@ $('#sendUserData').on('click', function () {
     console.log(user_data);
     API.checkUserInSystem(user_data, sendToBack);
 });
-},{"../API":1}],3:[function(require,module,exports){
+},{"../API":1}],4:[function(require,module,exports){
 $(function () {
     let homePage = require('./mainPage/home');
     let signUpPage = require('./signUp/forSignUp');
@@ -114,20 +134,70 @@ $(function () {
     let orderPage = require('./orderPage/order');
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
-    let shopPage = require('./shop/shop');
-    let productCart = require('./productCart/Cart');
 
-    archivePage.initializeArchive();
-    payPage.initializePayments();
-    shopPage.initializeProducts();
+    try {
+        archivePage.initializeArchive();
+        payPage.initializePayments();
+    } catch (e) {
+
+    }
+    orderParamPage.initializeOrderParamPage();
+    orderParamPage.showGif();
 });
-},{"./login/login":2,"./mainPage/home":4,"./orderPage/order":5,"./ordrParamPage/orderParamMain":6,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./shop/shop":12,"./signUp/forSignUp":13,"./viewDeliveries/archive":14}],4:[function(require,module,exports){
+},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./profile/profile":9,"./signUp/forSignUp":10,"./viewDeliveries/archive":11}],5:[function(require,module,exports){
+$('#my-dels').click(function () {
+    window.location.href = 'http://localhost:3989/archive.html';
+});
 
-},{}],5:[function(require,module,exports){
+$('#my-dels-txt').click(function () {
+    $('#my-dels').click();
+});
+
+$('#new-del').click(function () {
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/order.html';
+    }
+});
+
+$('#new-del-txt').click(function () {
+    $('#new-del').click();
+});
+
+$('#mini-shop').click(function () {
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/shop.html';
+    }
+});
+
+$('#mini-shop-txt').click(function () {
+    $('#mini-shop').click();
+});
+
+$('#pay').click(function () {
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/payment.html';
+    }
+});
+
+$('#pay-txt').click(function () {
+    $('#pay').click();
+});
+},{}],6:[function(require,module,exports){
 let nameCorrect = false;
 let surnameCorrect = false;
 let countryCodeCorrect = false;
 let phoneCorrect = false;
+
+let storage = require('../localStorage');
 
 $('#input-name').on('input', function () {
     let correct = true;
@@ -141,6 +211,7 @@ $('#input-name').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("name", name);
         $('#name-success').show();
         $('#name-failure').hide();
         nameCorrect = true;
@@ -167,6 +238,7 @@ $('#input-surname').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("surname", surname);
         $('#surname-success').show();
         $('#surname-failure').hide();
         surnameCorrect = true;
@@ -193,6 +265,7 @@ $('#input-country-code').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("country-code", countryCode);
         $('#country-code-success').show();
         $('#country-code-failure').hide();
         countryCodeCorrect = true;
@@ -219,6 +292,7 @@ $('#input-phone').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("phone", phone);
         $('#phone-success').show();
         $('#phone-failure').hide();
         phoneCorrect = true;
@@ -231,21 +305,62 @@ $('#input-phone').on('input', function () {
         phoneCorrect = false;
         $('#btn-next').prop('disabled', true);
     }
+
+    console.log($('#input-name').val());
 });
 
-exports.name = $('#input-name').value;
-exports.surname = $('#input-surname').value;
-exports.phone = $('#input-country-code').value + $('#input-phone').value;
-exports.planet = $('#planets').val();
-},{}],6:[function(require,module,exports){
+$('#btn-next').click(function () {
+    storage.set("destination", $('#planets').val());
+});
+},{"../localStorage":2}],7:[function(require,module,exports){
+function initializeOrderParamPage() {
+    try{
+        positionRollbar();
+    } catch{}
+}
+
+let storage = require('../localStorage');
+let api = require('../API');
+let orderData = "";
+
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, '0');
+var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = today.getFullYear();
+today = yyyy + '-' + mm + '-' + dd;
+
+let payer = "Sender";
+
+function showGif() {
+    if (storage.get('destination') === 'mercury') {
+        $('#mercury-gif').show();
+    } else if (storage.get('destination') === 'venus') {
+        $('#venus-gif').show();
+    } else if (storage.get('destination') === 'earth') {
+        $('#earth-gif').show();
+    } else if (storage.get('destination') === 'mars') {
+        $('#mars-gif').show();
+    } else if (storage.get('destination') === 'jupiter') {
+        $('#jupiter-gif').show();
+    } else if (storage.get('destination') === 'saturn') {
+        $('#saturn-gif').show();
+    } else if (storage.get('destination') === 'uranus') {
+        $('#uranus-gif').show();
+    } else if (storage.get('destination') === 'neptune') {
+        $('#neptune-gif').show();
+    }
+}
+
 $('#input-cost').on('input', function() {
     let val = $(this).val();
     if (!parseEvaluatedCost(val)) {
         $('#cost-success').hide();
         $('#cost-failure').show();
+        $('#final-order').prop('disabled', true);
     } else {
         $('#cost-success').show();
         $('#cost-failure').hide();
+        $('#final-order').prop('disabled', false);
     }
 })
 
@@ -261,71 +376,153 @@ function parseEvaluatedCost(input) {
 }
 
 $('#receiver-radio').on('click', function () {
-    if (!$(this).checked) {
-        $(this).prop('checked', true);
-        $('#sender-radio').prop('checked', false);
-    }
+    $(this).prop('checked', true);
+    $('#sender-radio').prop('checked', false);
+
+    payer = "Receiver";
 })
 
 $('#sender-radio').on('click', function () {
-    if (!$(this).checked) {
-        $(this).prop('checked', true);
-        $('#receiver-radio').prop('checked', false);
-    }
+    $(this).prop('checked', true);
+    $('#receiver-radio').prop('checked', false);
+    payer = "Sender";
 })
-},{}],7:[function(require,module,exports){
-function getDeliveries() {
-    let deliveries = [
+
+$('#final-order').click(function () {
+    let data = {
+        name: storage.get("name"),
+        surname: storage.get("surname"),
+        phone: storage.get("country-code") + storage.get("phone"),
+        destination: storage.get("destination"),
+        weight: $('#weight-val').text(),
+        description: $('#text-desc').val(),
+        date: today,
+        cost: $('#input-cost').val() * 10 + Number.parseInt($('#weight-val').text()) * 5 + 500,
+        status: "sent",
+        payer: payer,
+        paid: "false"
+    };
+
+    orderData = data;
+
+    $('#span-name').text("name: " + data.name);
+    $('#span-surname').text('surname: ' + data.surname);
+    $('#span-phone').text("phone: " + data.phone);
+    $('#span-destination').text("destination: " + data.destination);
+    $('#span-weight').text("weight: " + data.weight);
+    $('#span-description').text("description: " + data.description);
+    $('#span-date').text("date: " + data.date);
+    $('#span-cost').text("cost: " + data.cost);
+    $('#span-status').text("status: " + data.status);
+    $('#span-payer').text("payer: " + data.payer);
+});
+
+let ismousedown;
+jQuery.fn.draggit = function (el, doSmth) {
+    var thisdiv = this;
+    var thistarget = $(el);
+    var relX;
+    var targetw = thistarget.width();
+
+    thistarget.css('position','absolute');
+
+
+    thisdiv.bind('mousedown', function(e){
+        var pos = $(el).offset();
+        var srcX = pos.left;
+
+        relX = e.pageX - srcX;
+
+        ismousedown = true;
+    });
+
+    $(document).bind('mousemove',function(e){
+        if(ismousedown)
         {
-            description: "Some description 0",
-            date: "Date 0",
-            cost: 100,
-            status: "Status 0",
-            destination: "Destination 0"
-        },
-        {
-            description: "Some description 1",
-            date: "Date 1",
-            cost: 10,
-            status: "Status 1",
-            destination: "Destination 1"
-        },
-        {
-            description: "Some description 2",
-            date: "Date 2",
-            cost: 1,
-            status: "Status 2",
-            destination: "Destination 2"
-        },
-        {
-            description: "Some description 3",
-            date: "Date 3",
-            cost: 200,
-            status: "Status 3",
-            destination: "Destination 3"
-        },
-        {
-            description: "Some description 4",
-            date: "Date 4",
-            cost: 1,
-            status: "Status 4",
-            destination: "Destination 4"
-        },
-        {
-            description: "Some description 5",
-            date: "Date 5",
-            cost: 200,
-            status: "Status 5",
-            destination: "Destination 5",
+            targetw = thistarget.width();
+
+            let start = $('#slide').css('left');
+            start = start.slice(0, start.length - 2);
+            start = Number.parseInt(start);
+            let minX = start - 10;
+            let maxX = minX + 200;
+
+            var mouseX = e.pageX;
+
+            var diffX = mouseX - relX;
+
+            // check if we are beyond document bounds ...
+            if(diffX < minX)   diffX = minX;
+            if(diffX > maxX) diffX = maxX;
+
+            $(el).css('left', (diffX)+'px');
+            doSmth(diffX);
         }
-    ];
-    return deliveries;
+    });
+
+    $(window).bind('mouseup', function(e){
+        ismousedown = false;
+    });
+
+    return this;
+} // end jQuery draggit function //
+
+function changeWeightLabel(coordX) {
+    let start = $('#slide').css('left');
+    start = start.slice(0, start.length - 2);
+    start = Number.parseInt(start);
+    let w = Number.parseInt((coordX + 10 - start) / 2);
+    $('#weight-val').text(w);
 }
 
-exports.getDeliveries = getDeliveries;
-},{}],8:[function(require,module,exports){
+$('#wrap-drag').draggit('#to-drag', changeWeightLabel);
+
+$('#slide').on('click', function (e) {
+    $('#to-drag').css('left', (e.pageX)+'px');
+    changeWeightLabel(e.pageX);
+})
+
+$(window).on('resize', function () {
+    try {
+        positionRollbar();
+    }
+    catch (err){}
+})
+
+function positionRollbar() {
+    let left = $('.container').css('margin-left');
+    left = left.slice(0, left.length - 2);
+    left = Number.parseInt(left);
+    left += 50;
+    $('#slide').css('left', left + 'px');
+    $('#zero').css('left', left - 30 + 'px');
+    $('#hundred').css('left', left + 220 + 'px');
+    $('#to-drag').css('left', left - 10 + 'px');
+}
+
+$('#btn-order').click(function () {
+    let delivery = orderData;
+    let user = JSON.parse(sessionStorage.getItem('user'));
+
+    let data = {
+        delivery: delivery,
+        user: user
+    }
+
+    api.createDelivery(data, function (err, data) {
+        if (err) {
+            console.log("Error at API.createDelivery");
+        }
+    });
+
+    window.location.href = 'http://localhost:3989/';
+
+});
+
+exports.initializeOrderParamPage = initializeOrderParamPage;
+exports.showGif = showGif;
+},{"../API":1,"../localStorage":2}],8:[function(require,module,exports){
 const templates = require('../viewDeliveries/delTemp');
-const deliveriesList = require('./deliveriesForPay');
 const server = require('../API');
 
 let viewOptions = false;
@@ -353,41 +550,73 @@ function liqpay(data) {
         console.log(data.status);
         console.log(data);
         //console.log(data.index);
-        deliveries.splice(indexToSplice, 1);
-        update();
+        deliveries[indexToSplice].paid = 'true';
+        server.modifyDelivery(deliveries[indexToSplice], function (err, data) {
+            if (err) {
+                console.log('View Error!!!');
+                console.log(err.toString());
+            }
+            console.log('Now remove from view');
+            deliveries.splice(indexToSplice, 1);
+            update();
+        })
     }).on("liqpay.ready", function(data) {
         // ready
     }).on("liqpay.close", function(data){
-        // close
+        update();
     });
 }
 
 function initializePayments() {
-    deliveries = deliveriesList.getDeliveries();
-    if (deliveries.length === 0) {
+    let user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user) {
         $('#is-paid').css('display', 'block');
+        return;
     }
-    for (let i = 0; i < deliveries.length; i++) {
-        deliveries[i] = {
-            description: deliveries[i].description,
-            date: deliveries[i].date,
-            cost: deliveries[i].cost,
-            status: deliveries[i].status,
-            destination: deliveries[i].destination,
-            fullStatus: deliveries[i].status,
-            fullDestination: deliveries[i].destination
+    //console.log(user);
+    server.getDeliveries(user, function (err, data) {
+        deliveries = [];
+        if (err) {
+            console.log(err.toString());
+        } else {
+            deliveries = data;
         }
-        if(deliveries[i].status.length > 12) {
-            deliveries[i].status = deliveries[i].status.substring(0, 9);
-            deliveries[i].status += "...";
+        //console.log(deliveries);
+        if (deliveries.length === 0) {
+            $('#is-paid').css('display', 'block');
         }
-        if(deliveries[i].destination.length > 14) {
-            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
-            deliveries[i].destination += "...";
+        let j = 0;
+        while (j < deliveries.length) {
+            if (deliveries[j].payer !== "Sender" || deliveries[j].paid === 'true') {
+                deliveries.splice(j, 1);
+            } else {
+                j++;
+            }
         }
-    }
-    deliveries.sort(sortByStatusAsc);
-    update();
+        for (let i = 0; i < deliveries.length; i++) {
+            deliveries[i] = {
+                id: deliveries[i].id,
+                description: deliveries[i].description ? deliveries[i].description : "No description",
+                date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
+                cost: deliveries[i].cost,
+                status: deliveries[i].status ? deliveries[i].status : "No Status",
+                destination: deliveries[i].destination,
+                fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
+                fullDestination: deliveries[i].destination,
+                paid: 'false',
+            }
+            if(deliveries[i].status.length > 12) {
+                deliveries[i].status = deliveries[i].status.substring(0, 9);
+                deliveries[i].status += "...";
+            }
+            if(deliveries[i].destination.length > 14) {
+                deliveries[i].destination = deliveries[i].destination.substring(0, 11);
+                deliveries[i].destination += "...";
+            }
+        }
+        deliveries.sort(sortByStatusAsc);
+        update();
+    });
 }
 
 $('.slideup-for-sort').on('click', function () {
@@ -603,6 +832,7 @@ function sortByCostDesc(delivery1, delivery2) {
 
 function update () {
     $delList.html("");
+    let cnt = 0;
     for (let i = 0; i < deliveries.length; i++) {
         let $html_code = templates.deliveryItem({
             numId: i,
@@ -614,9 +844,16 @@ function update () {
             destination: deliveries[i].destination,
             fullDestination: deliveries[i].fullDestination
         });
-        $delList.append($html_code);
+        if (deliveries[i].paid === 'false') {
+            $delList.append($html_code);
+            cnt++;
+        }
     }
 
+    if (cnt === 0) {
+        $('#is-paid').css('display', 'block');
+        return;
+    }
     let n = deliveries.length;
     for (let i = 0; i < n; i++) {
         let id = "#item" + i;
@@ -637,60 +874,7 @@ function update () {
 }
 
 exports.initializePayments = initializePayments;
-},{"../API":1,"../viewDeliveries/delTemp":15,"./deliveriesForPay":7}],9:[function(require,module,exports){
-let templates = require('../viewDeliveries/delTemp');
-
-let Cart = []
-let sum = 0;
-
-function addToCart(product){
-    if (!containsObject(product,Cart)) {
-        Cart.push({
-            quantity: 1,
-            product: product
-        });
-    }
-    else{
-        console.log('exist');
-    }
-    sum = 0;
-    for (let i = 0; i < Cart.length;i++){
-        sum += Cart[i].product.cost * Cart[i].quantity;
-    }
-    $('#cart-len').text(Cart.length);
-    console.log(Cart);
-}
-function containsObject(obj, list) {
-    let i;
-    for (i = 0; i < list.length; i++) {
-        if (list[i].product.id === obj.id) {
-            list[i].quantity++;
-            return true;
-        }
-    }
-
-    return false;
-}
-let $modalText = $('.modal-body');
-
-function showProductInCart() {
-    $modalText.html('');
-
-    $("#totalSum").text(sum);
-    function showOneProductInCart(product) {
-        let html_code =templates.cartItem({product:product});
-        let $node = $(html_code);
-
-        $modalText.append($node);
-    }
-    Cart.forEach(showOneProductInCart);
-    console.log($modalText);
-}
-exports.showProductInCart = showProductInCart;
-exports.addToCart = addToCart;
-
-
-},{"../viewDeliveries/delTemp":15}],10:[function(require,module,exports){
+},{"../API":1,"../viewDeliveries/delTemp":12}],9:[function(require,module,exports){
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
@@ -701,146 +885,12 @@ $("#sign_out").on('click', function () {
     window.location.href='http://localhost:3989';
 });
 
-},{}],11:[function(require,module,exports){
-function getProducts() {
-    let products = [
-        {
-            id: 1,
-            description: "Some description 0",
-            date: "Date 0",
-            cost: 100,
-            status: "Status 0",
-            icon:'../images/klein.jpg',
-        },
-        {
-            id: 2,
-            description: "Some description 1",
-            date: "Date 1",
-            cost: 10,
-            status: "Status 1",
-            icon:'./images/cube.png',
-        },
-        {
-            id: 3,
-            description: "Some description 2",
-            date: "Date 2",
-            cost: 1,
-            status: "Status 2",
-            icon:'../images/mebius.jpg',
-        },
-        {
-            id: 4,
-            description: "Some description 3",
-            date: "Date 3",
-            cost: 200,
-            status: "Status 3",
-            icon:'../images/mebius.jpg',
-        },
-        {
-            id: 5,
-            description: "Some description 4",
-            date: "Date 4",
-            cost: 1,
-            status: "Status 4",
-            icon:'./images/mebius.jpg',
-        },
-        {
-            id: 6,
-            description: "Some description 5",
-            date: "Date 5",
-            cost: 200,
-            status: "Status 5",
-            icon:'../images/mebius.jpg',
-        }
-    ];
-    return products;
-}
-
-exports.getProducts = getProducts;
-},{}],12:[function(require,module,exports){
-let products = require('../shop/products');
-let $products = $('#products');
-const templates = require('../viewDeliveries/delTemp');
-const PizzaCart = require('../productCart/Cart');
-let productList = []
-function initializeProducts() {
-    productList = products.getProducts();
-    if (products.length === 0) {
-        $('#is-paid').css('display', 'block');
-    }
-    for (let i = 0; i < productList.length; i++) {
-        productList[i] = {
-            id: productList[i].id,
-            description: productList[i].description,
-            date: productList[i].date,
-            cost: productList[i].cost,
-            status: productList[i].status,
-            icon: productList[i].icon,
-            fullStatus: productList[i].status,
-        }
-        if(productList[i].status.length > 12) {
-            productList[i].status = productList[i].status.substring(0, 9);
-            productList[i].status += "...";
-        }
-    }
-    productList.sort(sortByStatusAsc);
-    update();
-}
-function sortByStatusAsc(product1, product2) {
-    if (product1.status < product2.status) return -1;
-    else if (product1.status === product2.status) return 0;
-    else return 1;
-}
-
-function sortByStatusDesc(delivery1, delivery2) {
-    return -sortByStatusAsc(delivery1, delivery2);
-}
-
-function update () {
-    $products.html("");
-    function showOneProduct(product){
-        let html_code =templates.shopIitem({product:product});
-        let $node = $(html_code);
-
-        $node.find('.buyProduct').click(function () {
-            PizzaCart.addToCart(product);
-        });
-        $products.append($node);
-        }
-
-    productList.forEach(showOneProduct);
-
-}
-
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-let $modal = $('#myModal');
-// When the user clicks on the button, open the modal
-$('#basket').click(function () {
-   $modal.css('display','block');
-   PizzaCart.showProductInCart();
-});
-
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-    $modal.css('display','none');
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target === $modal) {
-        $modal.css('display','none');
-    }
-}
-
-exports.initializeProducts = initializeProducts;
-},{"../productCart/Cart":9,"../shop/products":11,"../viewDeliveries/delTemp":15}],13:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
 let code;
+let codeResent = 0;
 
 let API = require('../API');
 
@@ -852,7 +902,7 @@ function getRandomInt(min, max) {
 }
 
 function sendMail(name, surname, email) {
-    const code = getRandomInt(0, 9999);
+    const code = getRandomInt(1000, 9999);
     Email.send({
         Host: "smtp.gmail.com",
         Username: "universal.delivery.noreply@gmail.com",
@@ -866,10 +916,21 @@ function sendMail(name, surname, email) {
                 + code,
     })
         .then(function (message) {
-            alert("mail sent successfully")
+            //alert("mail sent successfully")
         });
     return code;
 }
+
+$('#resend').click(function () {
+    let name = $('#input-name').val();
+    name = trim(name);
+    let surname = $('#input-surname').val();
+    surname = trim(surname);
+    let email = $('#input-email').val();
+    email = trim(email);
+    codeResent = sendMail(name, surname, email);
+    alert("Code recent successfully! Please check your email again")
+});
 
 $('#sign-up-btn').on('click', function () {
     $('#format-request').hide();
@@ -912,6 +973,7 @@ $('#move-signup').on('click', function () {
         } else {
             $('#learn-email').hide();
             $('#validate-email').show();
+            $('#resend').show();
             address = email;
             code = sendMail(firstname, lastname, address);
             user.email = email;
@@ -919,10 +981,14 @@ $('#move-signup').on('click', function () {
 
     } else if ($('#validate-email').css('display') !== 'none') {
         let number = Number.parseInt($('#input-code').val());
+        if (codeResent) {
+            code = codeResent;
+        }
         if(number !== code) {
             $('#invalid-code').show();
         } else {
             $('#validate-email').hide();
+            $('#resend').hide();
             $('#learn-password').show();
         }
 
@@ -987,41 +1053,66 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],14:[function(require,module,exports){
+},{"../API":1}],11:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
+const serverInteract = require('../API');
 
 let viewOptions = false;
 let curSort = "status";
 let $delList = $("#add-deliveries");
 let deliveries;
+let newDescription = "";
+let payerChanged = false;
+let modifyInd = -1;
 
 function initializeArchive() {
-    deliveries = deliveriesList.getDeliveries();
-    if (deliveries.length === 0) {
+    let user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user) {
         $('#is-empty').css('display', 'block');
+        return;
     }
-    for (let i = 0; i < deliveries.length; i++) {
-        deliveries[i] = {
-            description: deliveries[i].description,
-            date: deliveries[i].date,
-            cost: deliveries[i].cost,
-            status: deliveries[i].status,
-            destination: deliveries[i].destination,
-            fullStatus: deliveries[i].status,
-            fullDestination: deliveries[i].destination
+    //console.log(user);
+    serverInteract.getDeliveries(user, function (err, data) {
+        deliveries = [];
+        if (err) {
+            console.log(err.toString());
+            return;
+        } else {
+            deliveries = data;
         }
-        if(deliveries[i].status.length > 12) {
-            deliveries[i].status = deliveries[i].status.substring(0, 9);
-            deliveries[i].status += "...";
+        //console.log(deliveries);
+        if (deliveries.length === 0) {
+            $('#is-empty').css('display', 'block');
         }
-        if(deliveries[i].destination.length > 14) {
-            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
-            deliveries[i].destination += "...";
+        for (let i = 0; i < deliveries.length; i++) {
+            deliveries[i] = {
+                id: deliveries[i].id,
+                description: deliveries[i].description ? deliveries[i].description : "No description",
+                date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
+                cost: deliveries[i].cost,
+                status: deliveries[i].status ? deliveries[i].status : "No Status",
+                destination: deliveries[i].destination,
+                fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
+                fullDestination: deliveries[i].destination,
+                payer: deliveries[i].payer,
+                paid: deliveries[i].paid,
+                name: deliveries[i].name,
+                surname: deliveries[i].surname,
+                phone: deliveries[i].phone
+            }
+            if(deliveries[i].status.length > 12) {
+                deliveries[i].status = deliveries[i].status.substring(0, 9);
+                deliveries[i].status += "...";
+            }
+            if(deliveries[i].destination.length > 14) {
+                deliveries[i].destination = deliveries[i].destination.substring(0, 11);
+                deliveries[i].destination += "...";
+            }
         }
-    }
-    deliveries.sort(sortByStatusAsc);
-    updateArchive();
+        deliveries.sort(sortByStatusAsc);
+        updateArchive();
+    });
 }
 
 $('.slideup-for-sort').on('click', function () {
@@ -1239,7 +1330,7 @@ function updateArchive () {
     $delList.html("");
     for (let i = 0; i < deliveries.length; i++) {
         let html_code = templates.deliveryItem({
-            numId: -1,
+            numId: -(i + 1),
             description: deliveries[i].description,
             date: deliveries[i].date,
             cost: deliveries[i].cost,
@@ -1250,21 +1341,116 @@ function updateArchive () {
         });
         $delList.append($(html_code));
     }
+
+    let n = deliveries.length;
+    for (let i = 0; i < n; i++) {
+        let id = "#item-" + (i + 1);
+        let curDel = $(id);
+        curDel.attr('data-toggle', 'modal');
+        curDel.attr('data-target', '#delivery-info');
+        curDel.on('click', function () {
+            if (deliveries[i].paid === 'true') {
+                $('#modal-payer').css('cursor', 'auto');
+            } else {
+                $('#modal-payer').css('cursor', 'pointer');
+            }
+            newDescription = "";
+            payerChanged = false;
+            modifyInd = i;
+            $('#modify-delivery').css('display', 'none');
+            $('#change-description').css('display', 'none');
+            $('#modal-description').css('display', 'inline');
+            $('#modal-payer').css('display', 'inline');
+
+            $('#modal-description').text(deliveries[i].description);
+            $('#modal-destination').text(deliveries[i].destination);
+            $('#modal-date').text(deliveries[i].date);
+            $('#modal-cost').text(deliveries[i].cost);
+            $('#modal-status').text(deliveries[i].status);
+            $('#modal-receiver').text(deliveries[i].name + ' ' + deliveries[i].surname);
+            $('#modal-phone').text(deliveries[i].phone);
+            $('#modal-payer').text(deliveries[i].payer);
+            $('#modal-paid').text(deliveries[i].paid === 'true' ? 'Yes' : 'No');
+        });
+    }
 }
+
+$('#modal-description').on('click', function () {
+    $('#change-description').attr('placeholder', deliveries[modifyInd].description);
+    $('#change-description').css('display', 'inline');
+    $('#change-description').focus();
+    $('#modal-description').css('display', 'none');
+    $('#modify-delivery').css('display', 'flex');
+});
+
+$('#change-description').on('focusout', function () {
+    newDescription = $('#change-description').val();
+    if (newDescription && newDescription.length > 0) {
+        $('#modal-description').text(newDescription);
+    } else if (!payerChanged) {
+        $('#modify-delivery').hide();
+    }
+    $('#change-description').css('display', 'none');
+    $('#modal-description').css('display', 'inline');
+});
+
+$('#modal-payer').on('click', function () {
+    if (deliveries[modifyInd].paid === 'true') {
+        return;
+    }
+    let payer = $(this).text();
+    if (payer === "Sender") {
+        $('#modal-payer').text("Receiver");
+    } else {
+        $('#modal-payer').text("Sender");
+    }
+    payerChanged = !payerChanged;
+    if (payerChanged) {
+        $('#modify-delivery').css('display', 'flex');
+    } else if (!newDescription || newDescription.length === 0) {
+        $('#modify-delivery').css('display', 'none');
+    }
+});
+
+$('#modify-delivery').on('click', function () {
+    let modifyNeeded = false;
+    if (newDescription.length > 0) {
+        deliveries[modifyInd].description = newDescription;
+        modifyNeeded = true;
+    }
+    if (payerChanged) {
+        modifyNeeded = true;
+        if (deliveries[modifyInd].payer === "Sender") {
+            deliveries[modifyInd].payer = "Receiver";
+        } else {
+            deliveries[modifyInd].payer = "Sender";
+        }
+    }
+    if (!modifyNeeded) {
+        return;
+    }
+    $('#delivery-info').modal('hide');
+    serverInteract.modifyDelivery(deliveries[modifyInd], function (err) {
+        if (err) {
+            console.log(err.toString());
+        }
+        updateArchive();
+    })
+});
+
+$('#delivery-info').on('hide.bs.modal', function () {
+    updateArchive();
+})
 
 $('[data-toggle="tooltip"]').tooltip();
 
 exports.initializeArchive = initializeArchive;
-},{"./delTemp":15,"./deliveriesList":16}],15:[function(require,module,exports){
+},{"../API":1,"./delTemp":12,"./deliveriesList":13}],12:[function(require,module,exports){
 
 const ejs = require('ejs');
 
-exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description'><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=date%></span></div>\r\n        <div class = 'item-cost'><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
-
-exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=product.fullStatus%>\">Status: <%=product.status%></span>\r\n    <button class=\"buyProduct\">Buy</button>\r\n</div>");
-
-exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n</div>");
-},{"ejs":18}],16:[function(require,module,exports){
+exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=description%>\"><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=date%>\"><span><%=date%></span></div>\r\n        <div class = 'item-cost' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=cost%>₴\"><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
+},{"ejs":16}],13:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
         {
@@ -1314,9 +1500,414 @@ function getDeliveries() {
 }
 
 exports.getDeliveries = getDeliveries;
-},{}],17:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],18:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
+(function () {
+	// Basil
+	var Basil = function (options) {
+		return Basil.utils.extend({}, Basil.plugins, new Basil.Storage().init(options));
+	};
+
+	// Version
+	Basil.version = '0.4.11';
+
+	// Utils
+	Basil.utils = {
+		extend: function () {
+			var destination = typeof arguments[0] === 'object' ? arguments[0] : {};
+			for (var i = 1; i < arguments.length; i++) {
+				if (arguments[i] && typeof arguments[i] === 'object')
+					for (var property in arguments[i])
+						destination[property] = arguments[i][property];
+			}
+			return destination;
+		},
+		each: function (obj, fnIterator, context) {
+			if (this.isArray(obj)) {
+				for (var i = 0; i < obj.length; i++)
+					if (fnIterator.call(context, obj[i], i) === false) return;
+			} else if (obj) {
+				for (var key in obj)
+					if (fnIterator.call(context, obj[key], key) === false) return;
+			}
+		},
+		tryEach: function (obj, fnIterator, fnError, context) {
+			this.each(obj, function (value, key) {
+				try {
+					return fnIterator.call(context, value, key);
+				} catch (error) {
+					if (this.isFunction(fnError)) {
+						try {
+							fnError.call(context, value, key, error);
+						} catch (error) {}
+					}
+				}
+			}, this);
+		},
+		registerPlugin: function (methods) {
+			Basil.plugins = this.extend(methods, Basil.plugins);
+		},
+		getTypeOf: function (obj) {
+			if (typeof obj === 'undefined' || obj === null)
+				return '' + obj;
+			return Object.prototype.toString.call(obj).replace(/^\[object\s(.*)\]$/, function ($0, $1) { return $1.toLowerCase(); });
+		}
+	};
+
+	// Add some isType methods: isArguments, isBoolean, isFunction, isString, isArray, isNumber, isDate, isRegExp, isUndefined, isNull.
+	var types = ['Arguments', 'Boolean', 'Function', 'String', 'Array', 'Number', 'Date', 'RegExp', 'Undefined', 'Null'];
+	for (var i = 0; i < types.length; i++) {
+		Basil.utils['is' + types[i]] = (function (type) {
+			return function (obj) {
+				return Basil.utils.getTypeOf(obj) === type.toLowerCase();
+			};
+		})(types[i]);
+	}
+
+	// Plugins
+	Basil.plugins = {};
+
+	// Options
+	Basil.options = Basil.utils.extend({
+		namespace: 'b45i1',
+		storages: ['local', 'cookie', 'session', 'memory'],
+		expireDays: 365,
+		keyDelimiter: '.'
+	}, window.Basil ? window.Basil.options : {});
+
+	// Storage
+	Basil.Storage = function () {
+		var _salt = 'b45i1' + (Math.random() + 1)
+				.toString(36)
+				.substring(7),
+			_storages = {},
+			_isValidKey = function (key) {
+				var type = Basil.utils.getTypeOf(key);
+				return (type === 'string' && key) || type === 'number' || type === 'boolean';
+			},
+			_toStoragesArray = function (storages) {
+				if (Basil.utils.isArray(storages))
+					return storages;
+				return Basil.utils.isString(storages) ? [storages] : [];
+			},
+			_toStoredKey = function (namespace, path, delimiter) {
+				var key = '';
+				if (_isValidKey(path)) {
+					key += path;
+				} else if (Basil.utils.isArray(path)) {
+					path = Basil.utils.isFunction(path.filter) ? path.filter(_isValidKey) : path;
+					key = path.join(delimiter);
+				}
+				return key && _isValidKey(namespace) ? namespace + delimiter + key : key;
+ 			},
+			_toKeyName = function (namespace, key, delimiter) {
+				if (!_isValidKey(namespace))
+					return key;
+				return key.replace(new RegExp('^' + namespace + delimiter), '');
+			},
+			_toStoredValue = function (value) {
+				return JSON.stringify(value);
+			},
+			_fromStoredValue = function (value) {
+				return value ? JSON.parse(value) : null;
+			};
+
+		// HTML5 web storage interface
+		var webStorageInterface = {
+			engine: null,
+			check: function () {
+				try {
+					window[this.engine].setItem(_salt, true);
+					window[this.engine].removeItem(_salt);
+				} catch (e) {
+					return false;
+				}
+				return true;
+			},
+			set: function (key, value, options) {
+				if (!key)
+					throw Error('invalid key');
+				window[this.engine].setItem(key, value);
+			},
+			get: function (key) {
+				return window[this.engine].getItem(key);
+			},
+			remove: function (key) {
+				window[this.engine].removeItem(key);
+			},
+			reset: function (namespace) {
+				for (var i = 0, key; i < window[this.engine].length; i++) {
+					key = window[this.engine].key(i);
+					if (!namespace || key.indexOf(namespace) === 0) {
+						this.remove(key);
+						i--;
+					}
+				}
+			},
+			keys: function (namespace, delimiter) {
+				var keys = [];
+				for (var i = 0, key; i < window[this.engine].length; i++) {
+					key = window[this.engine].key(i);
+					if (!namespace || key.indexOf(namespace) === 0)
+						keys.push(_toKeyName(namespace, key, delimiter));
+				}
+				return keys;
+			}
+		};
+
+		// local storage
+		_storages.local = Basil.utils.extend({}, webStorageInterface, {
+			engine: 'localStorage'
+		});
+		// session storage
+		_storages.session = Basil.utils.extend({}, webStorageInterface, {
+			engine: 'sessionStorage'
+		});
+
+		// memory storage
+		_storages.memory = {
+			_hash: {},
+			check: function () {
+				return true;
+			},
+			set: function (key, value, options) {
+				if (!key)
+					throw Error('invalid key');
+				this._hash[key] = value;
+			},
+			get: function (key) {
+				return this._hash[key] || null;
+			},
+			remove: function (key) {
+				delete this._hash[key];
+			},
+			reset: function (namespace) {
+				for (var key in this._hash) {
+					if (!namespace || key.indexOf(namespace) === 0)
+						this.remove(key);
+				}
+			},
+			keys: function (namespace, delimiter) {
+				var keys = [];
+				for (var key in this._hash)
+					if (!namespace || key.indexOf(namespace) === 0)
+						keys.push(_toKeyName(namespace, key, delimiter));
+				return keys;
+			}
+		};
+
+		// cookie storage
+		_storages.cookie = {
+			check: function (options) {
+				if (!navigator.cookieEnabled)
+					return false;
+				if (window.self !== window.top) {
+					// we need to check third-party cookies;
+					var cookie = 'thirdparty.check=' + Math.round(Math.random() * 1000);
+					document.cookie = cookie + '; path=/';
+					return document.cookie.indexOf(cookie) !== -1;
+				}
+				// if cookie secure activated, ensure it works (not the case if we are in http only)
+				if (options && options.secure) {
+					try {
+						this.set(_salt, _salt, options);
+						var hasSecurelyPersited = this.get(_salt) === _salt;
+						this.remove(_salt);
+						return hasSecurelyPersited;
+					} catch (error) {
+						return false;
+					}
+				}
+				return true;
+			},
+			set: function (key, value, options) {
+				if (!this.check())
+					throw Error('cookies are disabled');
+				options = options || {};
+				if (!key)
+					throw Error('invalid key');
+				var cookie = encodeURIComponent(key) + '=' + encodeURIComponent(value);
+				// handle expiration days
+				if (options.expireDays) {
+					var date = new Date();
+					date.setTime(date.getTime() + (options.expireDays * 24 * 60 * 60 * 1000));
+					cookie += '; expires=' + date.toGMTString();
+				}
+				// handle domain
+				if (options.domain && options.domain !== document.domain) {
+					var _domain = options.domain.replace(/^\./, '');
+					if (document.domain.indexOf(_domain) === -1 || _domain.split('.').length <= 1)
+						throw Error('invalid domain');
+					cookie += '; domain=' + options.domain;
+				}
+				// handle same site
+				if (options.sameSite && ['lax','strict','none'].includes(options.sameSite.toLowerCase())) {
+					cookie += '; SameSite=' + options.sameSite;
+				}
+				// handle secure
+				if (options.secure === true) {
+					cookie += '; Secure';
+				}
+				document.cookie = cookie + '; path=/';
+			},
+			get: function (key) {
+				if (!this.check())
+					throw Error('cookies are disabled');
+				var encodedKey = encodeURIComponent(key);
+				var cookies = document.cookie ? document.cookie.split(';') : [];
+				// retrieve last updated cookie first
+				for (var i = cookies.length - 1, cookie; i >= 0; i--) {
+					cookie = cookies[i].replace(/^\s*/, '');
+					if (cookie.indexOf(encodedKey + '=') === 0)
+						return decodeURIComponent(cookie.substring(encodedKey.length + 1, cookie.length));
+				}
+				return null;
+			},
+			remove: function (key) {
+				// remove cookie from main domain
+				this.set(key, '', { expireDays: -1 });
+				// remove cookie from upper domains
+				var domainParts = document.domain.split('.');
+				for (var i = domainParts.length; i > 1; i--) {
+					this.set(key, '', { expireDays: -1, domain: '.' + domainParts.slice(- i).join('.') });
+				}
+			},
+			reset: function (namespace) {
+				var cookies = document.cookie ? document.cookie.split(';') : [];
+				for (var i = 0, cookie, key; i < cookies.length; i++) {
+					cookie = cookies[i].replace(/^\s*/, '');
+					key = cookie.substr(0, cookie.indexOf('='));
+					if (!namespace || key.indexOf(namespace) === 0)
+						this.remove(key);
+				}
+			},
+			keys: function (namespace, delimiter) {
+				if (!this.check())
+					throw Error('cookies are disabled');
+				var keys = [],
+					cookies = document.cookie ? document.cookie.split(';') : [];
+				for (var i = 0, cookie, key; i < cookies.length; i++) {
+					cookie = cookies[i].replace(/^\s*/, '');
+					key = decodeURIComponent(cookie.substr(0, cookie.indexOf('=')));
+					if (!namespace || key.indexOf(namespace) === 0)
+						keys.push(_toKeyName(namespace, key, delimiter));
+				}
+				return keys;
+			}
+		};
+
+		return {
+			init: function (options) {
+				this.setOptions(options);
+				return this;
+			},
+			setOptions: function (options) {
+				this.options = Basil.utils.extend({}, this.options || Basil.options, options);
+			},
+			support: function (storage) {
+				return _storages.hasOwnProperty(storage);
+			},
+			check: function (storage) {
+				if (this.support(storage))
+					return _storages[storage].check(this.options);
+				return false;
+			},
+			set: function (key, value, options) {
+				options = Basil.utils.extend({}, this.options, options);
+				if (!(key = _toStoredKey(options.namespace, key, options.keyDelimiter)))
+					return false;
+				value = options.raw === true ? value : _toStoredValue(value);
+				var where = null;
+				// try to set key/value in first available storage
+				Basil.utils.tryEach(_toStoragesArray(options.storages), function (storage, index) {
+					_storages[storage].set(key, value, options);
+					where = storage;
+					return false; // break;
+				}, null, this);
+				if (!where) {
+					// key has not been set anywhere
+					return false;
+				}
+				// remove key from all other storages
+				Basil.utils.tryEach(_toStoragesArray(options.storages), function (storage, index) {
+					if (storage !== where)
+						_storages[storage].remove(key);
+				}, null, this);
+				return true;
+			},
+			get: function (key, options) {
+				options = Basil.utils.extend({}, this.options, options);
+				if (!(key = _toStoredKey(options.namespace, key, options.keyDelimiter)))
+					return null;
+				var value = null;
+				Basil.utils.tryEach(_toStoragesArray(options.storages), function (storage, index) {
+					if (value !== null)
+						return false; // break if a value has already been found.
+					value = _storages[storage].get(key, options) || null;
+					value = options.raw === true ? value : _fromStoredValue(value);
+				}, function (storage, index, error) {
+					value = null;
+				}, this);
+				return value;
+			},
+			remove: function (key, options) {
+				options = Basil.utils.extend({}, this.options, options);
+				if (!(key = _toStoredKey(options.namespace, key, options.keyDelimiter)))
+					return;
+				Basil.utils.tryEach(_toStoragesArray(options.storages), function (storage) {
+					_storages[storage].remove(key);
+				}, null, this);
+			},
+			reset: function (options) {
+				options = Basil.utils.extend({}, this.options, options);
+				Basil.utils.tryEach(_toStoragesArray(options.storages), function (storage) {
+					_storages[storage].reset(options.namespace);
+				}, null, this);
+			},
+			keys: function (options) {
+				options = options || {};
+				var keys = [];
+				for (var key in this.keysMap(options))
+					keys.push(key);
+				return keys;
+			},
+			keysMap: function (options) {
+				options = Basil.utils.extend({}, this.options, options);
+				var map = {};
+				Basil.utils.tryEach(_toStoragesArray(options.storages), function (storage) {
+					Basil.utils.each(_storages[storage].keys(options.namespace, options.keyDelimiter), function (key) {
+						map[key] = Basil.utils.isArray(map[key]) ? map[key] : [];
+						map[key].push(storage);
+					}, this);
+				}, null, this);
+				return map;
+			}
+		};
+	};
+
+	// Access to native storages, without namespace or basil value decoration
+	Basil.memory = new Basil.Storage().init({ storages: 'memory', namespace: null, raw: true });
+	Basil.cookie = new Basil.Storage().init({ storages: 'cookie', namespace: null, raw: true });
+	Basil.localStorage = new Basil.Storage().init({ storages: 'local', namespace: null, raw: true });
+	Basil.sessionStorage = new Basil.Storage().init({ storages: 'session', namespace: null, raw: true });
+
+	// browser export
+	window.Basil = Basil;
+
+	// AMD export
+	if (typeof define === 'function' && define.amd) {
+		define(function() {
+			return Basil;
+		});
+	// commonjs export
+	} else if (typeof module !== 'undefined' && module.exports) {
+		module.exports = Basil;
+	}
+
+})();
+
+},{}],15:[function(require,module,exports){
+
+},{}],16:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -2257,7 +2848,7 @@ if (typeof window != 'undefined') {
   window.ejs = exports;
 }
 
-},{"../package.json":20,"./utils":19,"fs":17,"path":21}],19:[function(require,module,exports){
+},{"../package.json":18,"./utils":17,"fs":15,"path":19}],17:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -2438,7 +3029,7 @@ exports.hyphenToCamel = function (str) {
   return str.replace(/-[a-z]/g, function (match) { return match[1].toUpperCase(); });
 };
 
-},{}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports={
   "_from": "ejs@^3.1.6",
   "_id": "ejs@3.1.6",
@@ -2514,7 +3105,7 @@ module.exports={
   "version": "3.1.6"
 }
 
-},{}],21:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -3047,7 +3638,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":22}],22:[function(require,module,exports){
+},{"_process":20}],20:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -3233,4 +3824,4 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[3]);
+},{}]},{},[4]);

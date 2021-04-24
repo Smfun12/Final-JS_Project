@@ -12,11 +12,29 @@
 <%- include('common/navbar'); -%>
 
 <div class="container">
+    <img src="./images/mercury.gif" class="planet-gif" id="mercury-gif" data-toggle="tooltip" data-placement="top" title="Mercury">
+    <img src="./images/venus.gif" class="planet-gif" id="venus-gif">
+    <img src="./images/Earth.gif" class="planet-gif" id="earth-gif">
+    <img src="./images/Mars.gif" class="planet-gif" id="mars-gif">
+    <img src="./images/jupiter.gif" class="planet-gif" id="jupiter-gif">
+    <img src="./images/saturn.png" class="planet-gif" id="saturn-gif">
+    <img src="./images/uranus.gif" class="planet-gif" id="uranus-gif">
+    <img src="./images/Neptune.gif" class="planet-gif" id="neptune-gif">
+
     <div class="row">
         <label id="label-head-param"> Please enter the information about the delivery </label>
         <br><br>
     </div>
-    <div id="div-evaluated-cost">Evaluated cost (UAH):</div>
+    Estimated Weight (kg):
+    <div id = 'wrap-drag'>
+        <div class = 'noselect' id = 'zero'>0</div>
+        <div id = slide></div>
+        <div class = 'noselect' id = 'hundred'>100</div>
+        <div id = 'to-drag'></div>
+        <br>
+        <div id = 'weight-display'>Weight: <span id = 'weight-val'>0</span>kg</div>
+    </div>
+    <div id="div-evaluated-cost">Estimated cost (UAH):</div>
     <input class="form-control input-lg" id="input-cost" type="number" maxlength="6" placeholder="200">
     <div class="success" id="cost-success">Let it be.</div>
     <div class="failure" id="cost-failure">
@@ -40,7 +58,7 @@
         </label>
     </div>
     <div id = 'final-btn-wrapper'>
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#order-data-modal" id = 'final-order'>Order</button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#order-data-modal" id = 'final-order' disabled>Order</button>
     </div>
 </div>
 
@@ -55,11 +73,22 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Body</p>
+                <p>
+                    <span id="span-name"></span><br>
+                    <span id="span-surname"></span><br>
+                    <span id="span-phone"></span><br>
+                    <span id="span-destination"></span><br>
+                    <span id="span-weight"></span><br>
+                    <span id="span-description"></span><br>
+                    <span id="span-date"></span><br>
+                    <span id="span-cost"></span><br>
+                    <span id="span-status"></span><br>
+                    <span id="span-payer"></span><br>
+                </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-order">Order</button>
             </div>
         </div>
     </div>

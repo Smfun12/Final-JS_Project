@@ -7,10 +7,13 @@ $(function () {
     let orderPage = require('./orderPage/order');
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
-    let shopPage = require('./shop/shop');
-    let productCart = require('./productCart/Cart');
 
-    archivePage.initializeArchive();
-    payPage.initializePayments();
-    shopPage.initializeProducts();
+    try {
+        archivePage.initializeArchive();
+        payPage.initializePayments();
+    } catch (e) {
+
+    }
+    orderParamPage.initializeOrderParamPage();
+    orderParamPage.showGif();
 });

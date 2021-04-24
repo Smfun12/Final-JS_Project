@@ -45,4 +45,36 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="delivery-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">Delivery Info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span>
+                    Description: <span id = "modal-description"></span>
+                    <input type = 'text' id = 'change-description'>
+                </span> <br>
+                <span>Destination: <span id = "modal-destination"></span></span> <br>
+                <span>Date: <span id = "modal-date"></span></span> <br>
+                <div id = 'position-cost'>Cost: <span id = "modal-cost"></span>₴</div>
+                <span>Status: <span id = "modal-status"></span></span> <br>
+                <span>Receiver: <span id = "modal-receiver"></span></span> <br>
+                <span>Receiver's phone: <span id = "modal-phone"></span></span> <br>
+                <span>Pays: <span id = "modal-payer"></span></span> <br>
+                <span>Paid: <span id = "modal-paid"></span></span> <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id = 'modify-delivery'>Apply Changes</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal">Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <%- include('common/footer'); -%>

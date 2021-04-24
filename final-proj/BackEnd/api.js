@@ -14,6 +14,7 @@ const connection = mysql.createConnection({
     password: "root",
     timezone: "local"
 });
+
 connection.connect(function (err) {
     if (err) {
         return console.error("Ошибка: " + err.message);
@@ -68,6 +69,157 @@ exports.createUser = function (req, res) {
         array.push(user);
         res.send(array);
     }
+}
+
+exports.getDeliveries = function (req, res) {
+    //console.log("Get deliveries!!!");
+    let user = req.body;
+    if (!user) {
+        console.log("Register please:)");
+        res.send([]);
+        return;
+    }
+    connection.query("SELECT * FROM users",
+        function (err, results, fields) {
+            console.log(err);
+            //console.log(results);// собственно данные
+            let id = findUserByPwd(user, results);
+            if (id === -1) {
+                console.log('Error: no such user');
+                res.send([]);
+                return;
+            }
+            //console.log('id: ', id);
+            let query = "select * from deliveries where user_id = " + id;
+            connection.query(query,
+                function (err, in_res){
+                    let deliveries = [];
+                    for (let j = 0; j < in_res.length; j++) {
+                        deliveries.push({
+                            id: in_res[j].id,
+                            name: in_res[j].name,
+                            surname: in_res[j].surname,
+                            phone: in_res[j].phone,
+                            destination: in_res[j].destination,
+                            description: in_res[j].description,
+                            date: in_res[j].date,
+                            cost: in_res[j].cost,
+                            status: in_res[j].status,
+                            payer: in_res[j].payer,
+                            paid: in_res[j].paid
+                        });
+                    }
+                    //console.log('deliveries: ', deliveries);
+                    res.send(deliveries);
+                });
+        });
+}
+
+exports.createDelivery = function(req, res) {
+    let data = req.body;
+    let user = data.user;
+    let delivery = data.delivery;
+
+    connection.query('select * from users',
+        function (err, users) {
+            if(err) {
+                console.log(err.toString());
+                return;
+            }
+            let id = findUserByPwd(user, users);
+            if (id === -1) {
+                console.log("user not found");
+                return;
+            }
+            let query = insertQuery(delivery, id);
+            connection.query(query, function (err, res) {
+                if (err) {
+                    console.log(err.toString());
+                } else {
+                    console.log("Delivery added successfully");
+                }
+            })
+        });
+}
+
+exports.modifyDelivery = function (req, res) {
+    console.log('Modifying Delivery');
+    let delivery = req.body;
+    if (!delivery) {
+        return;
+    }
+    let findQuery = "select * from deliveries where id = " + delivery.id;
+    console.log(delivery.id);
+    connection.query(findQuery,
+        function (err, result) {
+            if (err || result.length !== 1) {
+                console.log("Delivery id is wrong!!!");
+                return;
+            }
+            console.log('Delivery Found!');
+            let oldInfo = result[0];
+            if (delivery.description) {
+                oldInfo.description = delivery.description;
+            }
+            if (delivery.payer) {
+                oldInfo.payer = delivery.payer;
+            }
+            if (delivery.paid) {
+                oldInfo.paid = delivery.paid;
+            }
+            let deleteQuery = 'DELETE FROM `js_project`.`deliveries`\n' +
+                'WHERE id = ' + delivery.id;
+            console.log(insertQuery(oldInfo, oldInfo.user_id));
+            connection.query(insertQuery(oldInfo, oldInfo.user_id), function (err, r) {
+                if (err) {
+                    console.log(err.toString());
+                    return;
+                }
+                connection.query(deleteQuery,
+                    function (err, res) {
+                    });
+            });
+        });
+}
+
+function insertQuery (delivery, id) {
+    return "INSERT INTO `js_project`.`deliveries`\n" +
+        "(\n" +
+        "`user_id`,\n" +
+        "`name`,\n" +
+        "`surname`,\n" +
+        "`phone`,\n" +
+        "`destination`,\n" +
+        "`description`,\n" +
+        "`date`,\n" +
+        "`cost`,\n" +
+        "`status`,\n" +
+        "`payer`,\n" +
+        "`paid`)\n" +
+        "VALUES\n" +
+        "(\n" +
+        id + ",\n" +
+        (delivery.name ? '"' + delivery.name + '"' : "null") + ",\n" +
+        (delivery.surname ? '"' + delivery.surname + '"' : "null") + ",\n" +
+        (delivery.phone ? "'" + delivery.phone + "'" : "null") + ",\n" +
+        '"' + delivery.destination + '"' + ",\n" +
+        (delivery.description ? '"' + delivery.description + '"' : "null") + ",\n" +
+        (delivery.date ? "'" + delivery.date + "'" : "null") + ",\n" +
+        delivery.cost + ",\n" +
+        (delivery.status ? "'" + delivery.status + "'" : "null") + ",\n" +
+        "'" + delivery.payer + "'" + ",\n" +
+        "'" + delivery.paid + "'" + ");";
+}
+
+function findUserByPwd(user, users) {
+    let id = -1;
+    for(let i = 0; i < users.length; i++) {
+        if (bcrypt.compareSync(user.password, users[i].password)) {
+            id = users[i].id;
+            break
+        }
+    }
+    return id;
 }
 
 exports.createPayment = function(req, res) {
