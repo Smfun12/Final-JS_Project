@@ -6,37 +6,16 @@ let viewOptions = false;
 let curSort = "status";
 let $delList = $("#add-deliveries");
 let deliveries;
-
-/*function initializeArchive() {
-    deliveries = deliveriesList.getDeliveries();
-    if (deliveries.length === 0) {
-        $('#is-empty').css('display', 'block');
-    }
-    for (let i = 0; i < deliveries.length; i++) {
-        deliveries[i] = {
-            description: deliveries[i].description,
-            date: deliveries[i].date,
-            cost: deliveries[i].cost,
-            status: deliveries[i].status,
-            destination: deliveries[i].destination,
-            fullStatus: deliveries[i].status,
-            fullDestination: deliveries[i].destination
-        }
-        if(deliveries[i].status.length > 12) {
-            deliveries[i].status = deliveries[i].status.substring(0, 9);
-            deliveries[i].status += "...";
-        }
-        if(deliveries[i].destination.length > 14) {
-            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
-            deliveries[i].destination += "...";
-        }
-    }
-    deliveries.sort(sortByStatusAsc);
-    updateArchive();
-}*/
+let newDescription = "";
+let payerChanged = false;
+let modifyInd = -1;
 
 function initializeArchive() {
     let user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user) {
+        $('#is-empty').css('display', 'block');
+        return;
+    }
     //console.log(user);
     serverInteract.getDeliveries(user, function (err, data) {
         deliveries = [];
@@ -52,13 +31,19 @@ function initializeArchive() {
         }
         for (let i = 0; i < deliveries.length; i++) {
             deliveries[i] = {
+                id: deliveries[i].id,
                 description: deliveries[i].description ? deliveries[i].description : "No description",
                 date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
                 cost: deliveries[i].cost,
                 status: deliveries[i].status ? deliveries[i].status : "No Status",
                 destination: deliveries[i].destination,
                 fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
-                fullDestination: deliveries[i].destination
+                fullDestination: deliveries[i].destination,
+                payer: deliveries[i].payer,
+                paid: deliveries[i].paid,
+                name: deliveries[i].name,
+                surname: deliveries[i].surname,
+                phone: deliveries[i].phone
             }
             if(deliveries[i].status.length > 12) {
                 deliveries[i].status = deliveries[i].status.substring(0, 9);
@@ -307,21 +292,99 @@ function updateArchive () {
         let curDel = $(id);
         curDel.attr('data-toggle', 'modal');
         curDel.attr('data-target', '#delivery-info');
-        /*$(id).on('click', function () {
-            //console.log("id: ", id);
-            let desc = "Payment info" +
-                "\r\nDescription: " + deliveries[i].description +
-                "\r\nDate: " + deliveries[i].date +
-                "\r\nStatus: " + deliveries[i].status + '.';
-            let payment_info = {
-                amount: deliveries[i].cost,
-                description: desc,
-            };
-            indexToSplice = i;
-            server.createPayment(payment_info, postInfo);
-        });*/
+        curDel.on('click', function () {
+            if (deliveries[i].paid === 'true') {
+                $('#modal-payer').css('cursor', 'auto');
+            } else {
+                $('#modal-payer').css('cursor', 'pointer');
+            }
+            newDescription = "";
+            payerChanged = false;
+            modifyInd = i;
+            $('#modify-delivery').css('display', 'none');
+            $('#change-description').css('display', 'none');
+            $('#modal-description').css('display', 'inline');
+            $('#modal-payer').css('display', 'inline');
+
+            $('#modal-description').text(deliveries[i].description);
+            $('#modal-destination').text(deliveries[i].destination);
+            $('#modal-date').text(deliveries[i].date);
+            $('#modal-cost').text(deliveries[i].cost);
+            $('#modal-status').text(deliveries[i].status);
+            $('#modal-receiver').text(deliveries[i].name + ' ' + deliveries[i].surname);
+            $('#modal-phone').text(deliveries[i].phone);
+            $('#modal-payer').text(deliveries[i].payer);
+            $('#modal-paid').text(deliveries[i].paid === 'true' ? 'Yes' : 'No');
+        });
     }
 }
+
+$('#modal-description').on('click', function () {
+    $('#change-description').attr('placeholder', deliveries[modifyInd].description);
+    $('#change-description').css('display', 'inline');
+    $('#change-description').focus();
+    $('#modal-description').css('display', 'none');
+    $('#modify-delivery').css('display', 'flex');
+});
+
+$('#change-description').on('focusout', function () {
+    newDescription = $('#change-description').val();
+    if (newDescription && newDescription.length > 0) {
+        $('#modal-description').text(newDescription);
+    } else if (!payerChanged) {
+        $('#modify-delivery').hide();
+    }
+    $('#change-description').css('display', 'none');
+    $('#modal-description').css('display', 'inline');
+});
+
+$('#modal-payer').on('click', function () {
+    if (deliveries[modifyInd].paid === 'true') {
+        return;
+    }
+    let payer = $(this).text();
+    if (payer === "Sender") {
+        $('#modal-payer').text("Receiver");
+    } else {
+        $('#modal-payer').text("Sender");
+    }
+    payerChanged = !payerChanged;
+    if (payerChanged) {
+        $('#modify-delivery').css('display', 'flex');
+    } else if (!newDescription || newDescription.length === 0) {
+        $('#modify-delivery').css('display', 'none');
+    }
+});
+
+$('#modify-delivery').on('click', function () {
+    let modifyNeeded = false;
+    if (newDescription.length > 0) {
+        deliveries[modifyInd].description = newDescription;
+        modifyNeeded = true;
+    }
+    if (payerChanged) {
+        modifyNeeded = true;
+        if (deliveries[modifyInd].payer === "Sender") {
+            deliveries[modifyInd].payer = "Receiver";
+        } else {
+            deliveries[modifyInd].payer = "Sender";
+        }
+    }
+    if (!modifyNeeded) {
+        return;
+    }
+    $('#delivery-info').modal('hide');
+    serverInteract.modifyDelivery(deliveries[modifyInd], function (err) {
+        if (err) {
+            console.log(err.toString());
+        }
+        updateArchive();
+    })
+});
+
+$('#delivery-info').on('hide.bs.modal', function () {
+    updateArchive();
+})
 
 $('[data-toggle="tooltip"]').tooltip();
 

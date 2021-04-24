@@ -15,6 +15,7 @@ function configureEndpoints(app) {
     app.post('/api/create-payment/', api.createPayment);
     app.post('/api/get-deliveries/', api.getDeliveries);
     app.post('/api/create-delivery/', api.createDelivery);
+    app.post('/api/modify-delivery/', api.modifyDelivery);
 
     //Сторінки
     //Головна сторінка

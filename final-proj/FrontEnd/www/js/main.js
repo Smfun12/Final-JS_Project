@@ -55,6 +55,10 @@ exports.getDeliveries = function (user, callback) {
 exports.createDelivery = function (data, callback) {
     backendPost('/api/create-delivery/', data, callback);
 }
+
+exports.modifyDelivery = function (data, callback) {
+    backendPost('/api/modify-delivery/', data, callback);
+}
 },{}],2:[function(require,module,exports){
 var basil = require('basil.js');
 basil = new basil();
@@ -64,7 +68,7 @@ exports.get = function (key) {
 exports.set = function (key, value) {
     return basil.set(key, value);
 };
-},{"basil.js":15}],3:[function(require,module,exports){
+},{"basil.js":14}],3:[function(require,module,exports){
 let API =require('../API');
 
 function parseEmail(email) {
@@ -140,7 +144,7 @@ $(function () {
     orderParamPage.initializeOrderParamPage();
     orderParamPage.showGif();
 });
-},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":9,"./profile/profile":10,"./signUp/forSignUp":11,"./viewDeliveries/archive":12}],5:[function(require,module,exports){
+},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./profile/profile":9,"./signUp/forSignUp":10,"./viewDeliveries/archive":11}],5:[function(require,module,exports){
 $('#my-dels').click(function () {
     window.location.href = 'http://localhost:3989/archive.html';
 });
@@ -518,58 +522,7 @@ $('#btn-order').click(function () {
 exports.initializeOrderParamPage = initializeOrderParamPage;
 exports.showGif = showGif;
 },{"../API":1,"../localStorage":2}],8:[function(require,module,exports){
-function getDeliveries() {
-    let deliveries = [
-        {
-            description: "Some description 0",
-            date: "Date 0",
-            cost: 100,
-            status: "Status 0",
-            destination: "Destination 0"
-        },
-        {
-            description: "Some description 1",
-            date: "Date 1",
-            cost: 10,
-            status: "Status 1",
-            destination: "Destination 1"
-        },
-        {
-            description: "Some description 2",
-            date: "Date 2",
-            cost: 1,
-            status: "Status 2",
-            destination: "Destination 2"
-        },
-        {
-            description: "Some description 3",
-            date: "Date 3",
-            cost: 200,
-            status: "Status 3",
-            destination: "Destination 3"
-        },
-        {
-            description: "Some description 4",
-            date: "Date 4",
-            cost: 1,
-            status: "Status 4",
-            destination: "Destination 4"
-        },
-        {
-            description: "Some description 5",
-            date: "Date 5",
-            cost: 200,
-            status: "Status 5",
-            destination: "Destination 5",
-        }
-    ];
-    return deliveries;
-}
-
-exports.getDeliveries = getDeliveries;
-},{}],9:[function(require,module,exports){
 const templates = require('../viewDeliveries/delTemp');
-const deliveriesList = require('./deliveriesForPay');
 const server = require('../API');
 
 let viewOptions = false;
@@ -597,45 +550,29 @@ function liqpay(data) {
         console.log(data.status);
         console.log(data);
         //console.log(data.index);
-        deliveries.splice(indexToSplice, 1);
-        update();
+        deliveries[indexToSplice].paid = 'true';
+        server.modifyDelivery(deliveries[indexToSplice], function (err, data) {
+            if (err) {
+                console.log('View Error!!!');
+                console.log(err.toString());
+            }
+            console.log('Now remove from view');
+            deliveries.splice(indexToSplice, 1);
+            update();
+        })
     }).on("liqpay.ready", function(data) {
         // ready
     }).on("liqpay.close", function(data){
-        // close
+        update();
     });
 }
 
-/*function initializePayments() {
-    deliveries = deliveriesList.getDeliveries();
-    if (deliveries.length === 0) {
-        $('#is-paid').css('display', 'block');
-    }
-    for (let i = 0; i < deliveries.length; i++) {
-        deliveries[i] = {
-            description: deliveries[i].description,
-            date: deliveries[i].date,
-            cost: deliveries[i].cost,
-            status: deliveries[i].status,
-            destination: deliveries[i].destination,
-            fullStatus: deliveries[i].status,
-            fullDestination: deliveries[i].destination
-        }
-        if(deliveries[i].status.length > 12) {
-            deliveries[i].status = deliveries[i].status.substring(0, 9);
-            deliveries[i].status += "...";
-        }
-        if(deliveries[i].destination.length > 14) {
-            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
-            deliveries[i].destination += "...";
-        }
-    }
-    deliveries.sort(sortByStatusAsc);
-    update();
-}*/
-
 function initializePayments() {
     let user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user) {
+        $('#is-paid').css('display', 'block');
+        return;
+    }
     //console.log(user);
     server.getDeliveries(user, function (err, data) {
         deliveries = [];
@@ -646,11 +583,11 @@ function initializePayments() {
         }
         //console.log(deliveries);
         if (deliveries.length === 0) {
-            $('#is-empty').css('display', 'block');
+            $('#is-paid').css('display', 'block');
         }
         let j = 0;
         while (j < deliveries.length) {
-            if (deliveries[j].payer !== "sender" || deliveries[j].paid === 'true') {
+            if (deliveries[j].payer !== "Sender" || deliveries[j].paid === 'true') {
                 deliveries.splice(j, 1);
             } else {
                 j++;
@@ -658,13 +595,15 @@ function initializePayments() {
         }
         for (let i = 0; i < deliveries.length; i++) {
             deliveries[i] = {
+                id: deliveries[i].id,
                 description: deliveries[i].description ? deliveries[i].description : "No description",
                 date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
                 cost: deliveries[i].cost,
                 status: deliveries[i].status ? deliveries[i].status : "No Status",
                 destination: deliveries[i].destination,
                 fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
-                fullDestination: deliveries[i].destination
+                fullDestination: deliveries[i].destination,
+                paid: 'false',
             }
             if(deliveries[i].status.length > 12) {
                 deliveries[i].status = deliveries[i].status.substring(0, 9);
@@ -893,6 +832,7 @@ function sortByCostDesc(delivery1, delivery2) {
 
 function update () {
     $delList.html("");
+    let cnt = 0;
     for (let i = 0; i < deliveries.length; i++) {
         let $html_code = templates.deliveryItem({
             numId: i,
@@ -904,9 +844,16 @@ function update () {
             destination: deliveries[i].destination,
             fullDestination: deliveries[i].fullDestination
         });
-        $delList.append($html_code);
+        if (deliveries[i].paid === 'false') {
+            $delList.append($html_code);
+            cnt++;
+        }
     }
 
+    if (cnt === 0) {
+        $('#is-paid').css('display', 'block');
+        return;
+    }
     let n = deliveries.length;
     for (let i = 0; i < n; i++) {
         let id = "#item" + i;
@@ -927,7 +874,7 @@ function update () {
 }
 
 exports.initializePayments = initializePayments;
-},{"../API":1,"../viewDeliveries/delTemp":13,"./deliveriesForPay":8}],10:[function(require,module,exports){
+},{"../API":1,"../viewDeliveries/delTemp":12}],9:[function(require,module,exports){
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
@@ -938,7 +885,7 @@ $("#sign_out").on('click', function () {
     window.location.href='http://localhost:3989';
 });
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -1106,7 +1053,7 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],12:[function(require,module,exports){
+},{"../API":1}],11:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
 const serverInteract = require('../API');
@@ -1115,37 +1062,16 @@ let viewOptions = false;
 let curSort = "status";
 let $delList = $("#add-deliveries");
 let deliveries;
-
-/*function initializeArchive() {
-    deliveries = deliveriesList.getDeliveries();
-    if (deliveries.length === 0) {
-        $('#is-empty').css('display', 'block');
-    }
-    for (let i = 0; i < deliveries.length; i++) {
-        deliveries[i] = {
-            description: deliveries[i].description,
-            date: deliveries[i].date,
-            cost: deliveries[i].cost,
-            status: deliveries[i].status,
-            destination: deliveries[i].destination,
-            fullStatus: deliveries[i].status,
-            fullDestination: deliveries[i].destination
-        }
-        if(deliveries[i].status.length > 12) {
-            deliveries[i].status = deliveries[i].status.substring(0, 9);
-            deliveries[i].status += "...";
-        }
-        if(deliveries[i].destination.length > 14) {
-            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
-            deliveries[i].destination += "...";
-        }
-    }
-    deliveries.sort(sortByStatusAsc);
-    updateArchive();
-}*/
+let newDescription = "";
+let payerChanged = false;
+let modifyInd = -1;
 
 function initializeArchive() {
     let user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user) {
+        $('#is-empty').css('display', 'block');
+        return;
+    }
     //console.log(user);
     serverInteract.getDeliveries(user, function (err, data) {
         deliveries = [];
@@ -1161,13 +1087,19 @@ function initializeArchive() {
         }
         for (let i = 0; i < deliveries.length; i++) {
             deliveries[i] = {
+                id: deliveries[i].id,
                 description: deliveries[i].description ? deliveries[i].description : "No description",
                 date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
                 cost: deliveries[i].cost,
                 status: deliveries[i].status ? deliveries[i].status : "No Status",
                 destination: deliveries[i].destination,
                 fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
-                fullDestination: deliveries[i].destination
+                fullDestination: deliveries[i].destination,
+                payer: deliveries[i].payer,
+                paid: deliveries[i].paid,
+                name: deliveries[i].name,
+                surname: deliveries[i].surname,
+                phone: deliveries[i].phone
             }
             if(deliveries[i].status.length > 12) {
                 deliveries[i].status = deliveries[i].status.substring(0, 9);
@@ -1416,31 +1348,109 @@ function updateArchive () {
         let curDel = $(id);
         curDel.attr('data-toggle', 'modal');
         curDel.attr('data-target', '#delivery-info');
-        /*$(id).on('click', function () {
-            //console.log("id: ", id);
-            let desc = "Payment info" +
-                "\r\nDescription: " + deliveries[i].description +
-                "\r\nDate: " + deliveries[i].date +
-                "\r\nStatus: " + deliveries[i].status + '.';
-            let payment_info = {
-                amount: deliveries[i].cost,
-                description: desc,
-            };
-            indexToSplice = i;
-            server.createPayment(payment_info, postInfo);
-        });*/
+        curDel.on('click', function () {
+            if (deliveries[i].paid === 'true') {
+                $('#modal-payer').css('cursor', 'auto');
+            } else {
+                $('#modal-payer').css('cursor', 'pointer');
+            }
+            newDescription = "";
+            payerChanged = false;
+            modifyInd = i;
+            $('#modify-delivery').css('display', 'none');
+            $('#change-description').css('display', 'none');
+            $('#modal-description').css('display', 'inline');
+            $('#modal-payer').css('display', 'inline');
+
+            $('#modal-description').text(deliveries[i].description);
+            $('#modal-destination').text(deliveries[i].destination);
+            $('#modal-date').text(deliveries[i].date);
+            $('#modal-cost').text(deliveries[i].cost);
+            $('#modal-status').text(deliveries[i].status);
+            $('#modal-receiver').text(deliveries[i].name + ' ' + deliveries[i].surname);
+            $('#modal-phone').text(deliveries[i].phone);
+            $('#modal-payer').text(deliveries[i].payer);
+            $('#modal-paid').text(deliveries[i].paid === 'true' ? 'Yes' : 'No');
+        });
     }
 }
+
+$('#modal-description').on('click', function () {
+    $('#change-description').attr('placeholder', deliveries[modifyInd].description);
+    $('#change-description').css('display', 'inline');
+    $('#change-description').focus();
+    $('#modal-description').css('display', 'none');
+    $('#modify-delivery').css('display', 'flex');
+});
+
+$('#change-description').on('focusout', function () {
+    newDescription = $('#change-description').val();
+    if (newDescription && newDescription.length > 0) {
+        $('#modal-description').text(newDescription);
+    } else if (!payerChanged) {
+        $('#modify-delivery').hide();
+    }
+    $('#change-description').css('display', 'none');
+    $('#modal-description').css('display', 'inline');
+});
+
+$('#modal-payer').on('click', function () {
+    if (deliveries[modifyInd].paid === 'true') {
+        return;
+    }
+    let payer = $(this).text();
+    if (payer === "Sender") {
+        $('#modal-payer').text("Receiver");
+    } else {
+        $('#modal-payer').text("Sender");
+    }
+    payerChanged = !payerChanged;
+    if (payerChanged) {
+        $('#modify-delivery').css('display', 'flex');
+    } else if (!newDescription || newDescription.length === 0) {
+        $('#modify-delivery').css('display', 'none');
+    }
+});
+
+$('#modify-delivery').on('click', function () {
+    let modifyNeeded = false;
+    if (newDescription.length > 0) {
+        deliveries[modifyInd].description = newDescription;
+        modifyNeeded = true;
+    }
+    if (payerChanged) {
+        modifyNeeded = true;
+        if (deliveries[modifyInd].payer === "Sender") {
+            deliveries[modifyInd].payer = "Receiver";
+        } else {
+            deliveries[modifyInd].payer = "Sender";
+        }
+    }
+    if (!modifyNeeded) {
+        return;
+    }
+    $('#delivery-info').modal('hide');
+    serverInteract.modifyDelivery(deliveries[modifyInd], function (err) {
+        if (err) {
+            console.log(err.toString());
+        }
+        updateArchive();
+    })
+});
+
+$('#delivery-info').on('hide.bs.modal', function () {
+    updateArchive();
+})
 
 $('[data-toggle="tooltip"]').tooltip();
 
 exports.initializeArchive = initializeArchive;
-},{"../API":1,"./delTemp":13,"./deliveriesList":14}],13:[function(require,module,exports){
+},{"../API":1,"./delTemp":12,"./deliveriesList":13}],12:[function(require,module,exports){
 
 const ejs = require('ejs');
 
 exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=description%>\"><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=date%>\"><span><%=date%></span></div>\r\n        <div class = 'item-cost' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=cost%>₴\"><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
-},{"ejs":17}],14:[function(require,module,exports){
+},{"ejs":16}],13:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
         {
@@ -1490,7 +1500,7 @@ function getDeliveries() {
 }
 
 exports.getDeliveries = getDeliveries;
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function () {
 	// Basil
 	var Basil = function (options) {
@@ -1895,9 +1905,9 @@ exports.getDeliveries = getDeliveries;
 
 })();
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -2838,7 +2848,7 @@ if (typeof window != 'undefined') {
   window.ejs = exports;
 }
 
-},{"../package.json":19,"./utils":18,"fs":16,"path":20}],18:[function(require,module,exports){
+},{"../package.json":18,"./utils":17,"fs":15,"path":19}],17:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -3019,7 +3029,7 @@ exports.hyphenToCamel = function (str) {
   return str.replace(/-[a-z]/g, function (match) { return match[1].toUpperCase(); });
 };
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports={
   "_from": "ejs@^3.1.6",
   "_id": "ejs@3.1.6",
@@ -3095,7 +3105,7 @@ module.exports={
   "version": "3.1.6"
 }
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -3628,7 +3638,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":21}],21:[function(require,module,exports){
+},{"_process":20}],20:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

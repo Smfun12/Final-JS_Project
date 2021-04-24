@@ -1,5 +1,4 @@
 const templates = require('../viewDeliveries/delTemp');
-const deliveriesList = require('./deliveriesForPay');
 const server = require('../API');
 
 let viewOptions = false;
@@ -27,45 +26,29 @@ function liqpay(data) {
         console.log(data.status);
         console.log(data);
         //console.log(data.index);
-        deliveries.splice(indexToSplice, 1);
-        update();
+        deliveries[indexToSplice].paid = 'true';
+        server.modifyDelivery(deliveries[indexToSplice], function (err, data) {
+            if (err) {
+                console.log('View Error!!!');
+                console.log(err.toString());
+            }
+            console.log('Now remove from view');
+            deliveries.splice(indexToSplice, 1);
+            update();
+        })
     }).on("liqpay.ready", function(data) {
         // ready
     }).on("liqpay.close", function(data){
-        // close
+        update();
     });
 }
 
-/*function initializePayments() {
-    deliveries = deliveriesList.getDeliveries();
-    if (deliveries.length === 0) {
-        $('#is-paid').css('display', 'block');
-    }
-    for (let i = 0; i < deliveries.length; i++) {
-        deliveries[i] = {
-            description: deliveries[i].description,
-            date: deliveries[i].date,
-            cost: deliveries[i].cost,
-            status: deliveries[i].status,
-            destination: deliveries[i].destination,
-            fullStatus: deliveries[i].status,
-            fullDestination: deliveries[i].destination
-        }
-        if(deliveries[i].status.length > 12) {
-            deliveries[i].status = deliveries[i].status.substring(0, 9);
-            deliveries[i].status += "...";
-        }
-        if(deliveries[i].destination.length > 14) {
-            deliveries[i].destination = deliveries[i].destination.substring(0, 11);
-            deliveries[i].destination += "...";
-        }
-    }
-    deliveries.sort(sortByStatusAsc);
-    update();
-}*/
-
 function initializePayments() {
     let user = JSON.parse(sessionStorage.getItem('user'));
+    if (!user) {
+        $('#is-paid').css('display', 'block');
+        return;
+    }
     //console.log(user);
     server.getDeliveries(user, function (err, data) {
         deliveries = [];
@@ -76,11 +59,11 @@ function initializePayments() {
         }
         //console.log(deliveries);
         if (deliveries.length === 0) {
-            $('#is-empty').css('display', 'block');
+            $('#is-paid').css('display', 'block');
         }
         let j = 0;
         while (j < deliveries.length) {
-            if (deliveries[j].payer !== "sender" || deliveries[j].paid === 'true') {
+            if (deliveries[j].payer !== "Sender" || deliveries[j].paid === 'true') {
                 deliveries.splice(j, 1);
             } else {
                 j++;
@@ -88,13 +71,15 @@ function initializePayments() {
         }
         for (let i = 0; i < deliveries.length; i++) {
             deliveries[i] = {
+                id: deliveries[i].id,
                 description: deliveries[i].description ? deliveries[i].description : "No description",
                 date: deliveries[i].date ? deliveries[i].date.slice(0, 10) : "No Date",
                 cost: deliveries[i].cost,
                 status: deliveries[i].status ? deliveries[i].status : "No Status",
                 destination: deliveries[i].destination,
                 fullStatus: deliveries[i].status ? deliveries[i].status : "No Status",
-                fullDestination: deliveries[i].destination
+                fullDestination: deliveries[i].destination,
+                paid: 'false',
             }
             if(deliveries[i].status.length > 12) {
                 deliveries[i].status = deliveries[i].status.substring(0, 9);
@@ -323,6 +308,7 @@ function sortByCostDesc(delivery1, delivery2) {
 
 function update () {
     $delList.html("");
+    let cnt = 0;
     for (let i = 0; i < deliveries.length; i++) {
         let $html_code = templates.deliveryItem({
             numId: i,
@@ -334,9 +320,16 @@ function update () {
             destination: deliveries[i].destination,
             fullDestination: deliveries[i].fullDestination
         });
-        $delList.append($html_code);
+        if (deliveries[i].paid === 'false') {
+            $delList.append($html_code);
+            cnt++;
+        }
     }
 
+    if (cnt === 0) {
+        $('#is-paid').css('display', 'block');
+        return;
+    }
     let n = deliveries.length;
     for (let i = 0; i < n; i++) {
         let id = "#item" + i;
