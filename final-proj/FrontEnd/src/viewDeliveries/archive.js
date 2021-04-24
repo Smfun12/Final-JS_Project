@@ -42,6 +42,7 @@ function initializeArchive() {
         deliveries = [];
         if (err) {
             console.log(err.toString());
+            return;
         } else {
             deliveries = data;
         }

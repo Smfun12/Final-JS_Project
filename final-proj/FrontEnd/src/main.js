@@ -8,7 +8,11 @@ $(function () {
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
 
-    archivePage.initializeArchive();
-    payPage.initializePayments();
+    try {
+        archivePage.initializeArchive();
+        payPage.initializePayments();
+    } catch (e) {
+
+    }
     orderParamPage.initializeOrderParamPage();
 });

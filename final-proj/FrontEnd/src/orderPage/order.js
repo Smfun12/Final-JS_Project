@@ -3,6 +3,8 @@ let surnameCorrect = false;
 let countryCodeCorrect = false;
 let phoneCorrect = false;
 
+let storage = require('../localStorage');
+
 $('#input-name').on('input', function () {
     let correct = true;
     let name = this.value;
@@ -15,6 +17,7 @@ $('#input-name').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("name", name);
         $('#name-success').show();
         $('#name-failure').hide();
         nameCorrect = true;
@@ -41,6 +44,7 @@ $('#input-surname').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("surname", surname);
         $('#surname-success').show();
         $('#surname-failure').hide();
         surnameCorrect = true;
@@ -67,6 +71,7 @@ $('#input-country-code').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("country-code", countryCode);
         $('#country-code-success').show();
         $('#country-code-failure').hide();
         countryCodeCorrect = true;
@@ -93,6 +98,7 @@ $('#input-phone').on('input', function () {
         }
     }
     if (correct) {
+        storage.set("phone", phone);
         $('#phone-success').show();
         $('#phone-failure').hide();
         phoneCorrect = true;
@@ -105,9 +111,10 @@ $('#input-phone').on('input', function () {
         phoneCorrect = false;
         $('#btn-next').prop('disabled', true);
     }
+
+    console.log($('#input-name').val());
 });
 
-exports.name = $('#input-name').value;
-exports.surname = $('#input-surname').value;
-exports.phone = $('#input-country-code').value + $('#input-phone').value;
-exports.planet = $('#planets').val();
+$('#btn-next').click(function () {
+    storage.set("destination", $('#planets').val());
+});

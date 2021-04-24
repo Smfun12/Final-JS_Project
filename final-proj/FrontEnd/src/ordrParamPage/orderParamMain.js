@@ -4,14 +4,32 @@ function initializeOrderParamPage() {
     } catch{}
 }
 
+let storage = require('../localStorage');
+let api = require('../API');
+let orderData = "";
+
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, '0');
+var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = today.getFullYear();
+
+// today = mm + '/' + dd + '/' + yyyy;
+today = yyyy + '-' + mm + '-' + dd;
+// document.write(today);
+
+// let payer = ($('#sender-radio').is(':checked')) ? "Sender" : "Receiver";
+let payer = "Sender";
+
 $('#input-cost').on('input', function() {
     let val = $(this).val();
     if (!parseEvaluatedCost(val)) {
         $('#cost-success').hide();
         $('#cost-failure').show();
+        $('#final-order').prop('disabled', true);
     } else {
         $('#cost-success').show();
         $('#cost-failure').hide();
+        $('#final-order').prop('disabled', false);
     }
 })
 
@@ -27,18 +45,49 @@ function parseEvaluatedCost(input) {
 }
 
 $('#receiver-radio').on('click', function () {
-    if (!$(this).checked) {
+    // if (!$(this).checked) {
         $(this).prop('checked', true);
         $('#sender-radio').prop('checked', false);
-    }
+    // }
+    payer = "Receiver";
 })
 
 $('#sender-radio').on('click', function () {
-    if (!$(this).checked) {
+    // if (!$(this).checked) {
         $(this).prop('checked', true);
         $('#receiver-radio').prop('checked', false);
-    }
+    // }
+    payer = "Sender";
 })
+
+$('#final-order').click(function () {
+    let data = {
+        name: storage.get("name"),
+        surname: storage.get("surname"),
+        phone: storage.get("country-code") + storage.get("phone"),
+        destination: storage.get("destination"),
+        weight: $('#weight-val').text(),
+        description: $('#text-desc').val(),
+        date: today,
+        cost: $('#input-cost').val(),
+        status: "sent",
+        payer: payer,
+        paid: false
+    };
+
+    orderData = data;
+
+    $('#span-name').text("name: " + data.name);
+    $('#span-surname').text('surname: ' + data.surname);
+    $('#span-phone').text("phone: " + data.phone);
+    $('#span-destination').text("destination: " + data.destination);
+    $('#span-weight').text("weight: " + data.weight);
+    $('#span-description').text("description: " + data.description);
+    $('#span-date').text("date: " + data.date);
+    $('#span-cost').text("cost: " + data.cost);
+    $('#span-status').text("status: " + data.status);
+    $('#span-payer').text("payer: " + data.payer);
+});
 
 let ismousedown;
 jQuery.fn.draggit = function (el, doSmth) {
@@ -126,5 +175,24 @@ function positionRollbar() {
     $('#hundred').css('left', left + 220 + 'px');
     $('#to-drag').css('left', left - 10 + 'px');
 }
+
+$('#btn-order').click(function () {
+    let delivery = orderData;
+    let user = JSON.parse(sessionStorage.getItem('user'));
+
+    let data = {
+        delivery: delivery,
+        user: user
+    }
+
+    api.createDelivery(data, function (err, data) {
+        if (err) {
+            console.log("Error at API.createDelivery");
+        }
+    });
+
+    window.location.href = 'http://localhost:3989/';
+
+});
 
 exports.initializeOrderParamPage = initializeOrderParamPage;
