@@ -8,6 +8,9 @@ $(function () {
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
 
+    let shopPage = require('./shop/shop');
+    let productCart = require('./productCart/Cart');
+    shopPage.initializeProducts();
     try {
         archivePage.initializeArchive();
         payPage.initializePayments();
