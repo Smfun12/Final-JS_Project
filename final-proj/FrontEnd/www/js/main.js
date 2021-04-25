@@ -150,6 +150,7 @@ $(function () {
     }
     orderParamPage.initializeOrderParamPage();
     orderParamPage.showGif();
+    profilePage.loadProfile();
 });
 },{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./shop/shop":12,"./signUp/forSignUp":13,"./viewDeliveries/archive":14}],5:[function(require,module,exports){
 $('#my-dels').click(function () {
@@ -501,10 +502,11 @@ function positionRollbar() {
     left = left.slice(0, left.length - 2);
     left = Number.parseInt(left);
     left += 50;
+    let w = Number.parseInt($('#weight-val').text());
     $('#slide').css('left', left + 'px');
     $('#zero').css('left', left - 30 + 'px');
     $('#hundred').css('left', left + 220 + 'px');
-    $('#to-drag').css('left', left - 10 + 'px');
+    $('#to-drag').css('left', left - 10 + 2*w + 'px');
 }
 
 $('#btn-order').click(function () {
@@ -935,6 +937,7 @@ exports.addToCart = addToCart;
 
 
 },{"../viewDeliveries/delTemp":15}],10:[function(require,module,exports){
+const server = require('../API');
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
     $('#profileEmail').text(user.email);
@@ -945,7 +948,36 @@ $("#sign_out").on('click', function () {
     window.location.href='http://localhost:3989';
 });
 
-},{}],11:[function(require,module,exports){
+function loadProfile() {
+    if (!user) return;
+    server.getDeliveries(user, function (err, data) {
+        if (err) {
+            console.log(err.toString());
+            return;
+        }
+        if (!data) {
+            console.log("Bad data");
+        }
+        $('#num-orders').text(data.length);
+        let rating = 0;
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].paid === 'true') {
+                rating += 100;
+            } else {
+                rating += 50;
+            }
+        }
+        if (rating === 0) {
+            $('#user-rating').text("Not Rated");
+        } else {
+            $('#user-rating').text(rating);
+        }
+    })
+}
+
+exports.loadProfile = loadProfile;
+
+},{"../API":1}],11:[function(require,module,exports){
 function getProducts() {
     let products = [
         {
@@ -1324,7 +1356,7 @@ function initializeArchive() {
                 deliveries[i].destination += "...";
             }
         }
-        deliveries.sort(sortByStatusAsc);
+        if (deliveries) deliveries.sort(sortByStatusAsc);
         updateArchive();
     });
 }
@@ -1368,49 +1400,49 @@ $('#status').on('click', function() {
 
 $('#date-arrow-down').on('click', function () {
     templateForArrowClick('date', 'down');
-    deliveries.sort(sortByDateDesc);
+    if (deliveries) deliveries.sort(sortByDateDesc);
     updateArchive();
 });
 
 $('#date-arrow-up').on('click', function () {
     templateForArrowClick('date', 'up');
-    deliveries.sort(sortByDateAsc);
+    if (deliveries) deliveries.sort(sortByDateAsc);
     updateArchive();
 });
 
 $('#status-arrow-down').on('click', function () {
    templateForArrowClick('status', 'down');
-    deliveries.sort(sortByStatusDesc);
+    if (deliveries) deliveries.sort(sortByStatusDesc);
     updateArchive();
 });
 
 $('#status-arrow-up').on('click', function () {
     templateForArrowClick('status', 'up');
-    deliveries.sort(sortByStatusAsc);
+    if (deliveries) deliveries.sort(sortByStatusAsc);
     updateArchive();
 });
 
 $('#dest-arrow-down').on('click', function () {
     templateForArrowClick('dest', 'down');
-    deliveries.sort(sortByDestinationDesc);
+    if (deliveries) deliveries.sort(sortByDestinationDesc);
     updateArchive();
 });
 
 $('#dest-arrow-up').on('click', function () {
     templateForArrowClick('dest', 'up');
-    deliveries.sort(sortByDestinationAsc);
+    if (deliveries) deliveries.sort(sortByDestinationAsc);
     updateArchive();
 });
 
 $('#cost-arrow-down').on('click', function () {
     templateForArrowClick('cost', 'down');
-    deliveries.sort(sortByCostDesc);
+    if (deliveries) deliveries.sort(sortByCostDesc);
     updateArchive();
 });
 
 $('#cost-arrow-up').on('click', function () {
     templateForArrowClick('cost', 'up');
-    deliveries.sort(sortByCostAsc);
+    if (deliveries) deliveries.sort(sortByCostAsc);
     updateArchive();
 });
 
@@ -1479,19 +1511,19 @@ function templateToSortByOtherVal(sortBy) {
     let text = 'Delivery ';
     if (sortBy === 'date') {
         text += "Date";
-        deliveries.sort(sortByDateAsc);
+        if (deliveries) deliveries.sort(sortByDateAsc);
     }
     if (sortBy === 'dest') {
         text += "Destination";
-        deliveries.sort(sortByDestinationAsc);
+        if (deliveries) deliveries.sort(sortByDestinationAsc);
     }
     if (sortBy === 'cost') {
         text += "Cost";
-        deliveries.sort(sortByCostAsc);
+        if (deliveries) deliveries.sort(sortByCostAsc);
     }
     if (sortBy === 'status') {
         text += "Status";
-        deliveries.sort(sortByStatusAsc);
+        if (deliveries) deliveries.sort(sortByStatusAsc);
     }
     $('.slideup-for-sort span').text(text);
     $('#main-arrow-down').css('display', 'none');
@@ -1542,6 +1574,7 @@ function sortByCostDesc(delivery1, delivery2) {
 
 function updateArchive () {
     $delList.html("");
+    if (!deliveries) return;
     for (let i = 0; i < deliveries.length; i++) {
         let html_code = templates.deliveryItem({
             numId: -(i + 1),

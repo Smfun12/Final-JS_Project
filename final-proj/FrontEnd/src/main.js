@@ -19,4 +19,5 @@ $(function () {
     }
     orderParamPage.initializeOrderParamPage();
     orderParamPage.showGif();
+    profilePage.loadProfile();
 });

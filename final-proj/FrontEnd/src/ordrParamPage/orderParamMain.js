@@ -179,10 +179,11 @@ function positionRollbar() {
     left = left.slice(0, left.length - 2);
     left = Number.parseInt(left);
     left += 50;
+    let w = Number.parseInt($('#weight-val').text());
     $('#slide').css('left', left + 'px');
     $('#zero').css('left', left - 30 + 'px');
     $('#hundred').css('left', left + 220 + 'px');
-    $('#to-drag').css('left', left - 10 + 'px');
+    $('#to-drag').css('left', left - 10 + 2*w + 'px');
 }
 
 $('#btn-order').click(function () {
