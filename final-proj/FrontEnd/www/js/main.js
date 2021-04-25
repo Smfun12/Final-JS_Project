@@ -72,7 +72,7 @@ exports.get = function (key) {
 exports.set = function (key, value) {
     return basil.set(key, value);
 };
-},{"basil.js":17}],3:[function(require,module,exports){
+},{"basil.js":16}],3:[function(require,module,exports){
 let API =require('../API');
 
 function parseEmail(email) {
@@ -152,7 +152,7 @@ $(function () {
     orderParamPage.showGif();
     profilePage.loadProfile();
 });
-},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./shop/shop":12,"./signUp/forSignUp":13,"./viewDeliveries/archive":14}],5:[function(require,module,exports){
+},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./shop/shop":11,"./signUp/forSignUp":12,"./viewDeliveries/archive":13}],5:[function(require,module,exports){
 $('#my-dels').click(function () {
     window.location.href = 'http://localhost:3989/archive.html';
 });
@@ -883,11 +883,20 @@ function update () {
 }
 
 exports.initializePayments = initializePayments;
-},{"../API":1,"../viewDeliveries/delTemp":15}],9:[function(require,module,exports){
+},{"../API":1,"../viewDeliveries/delTemp":14}],9:[function(require,module,exports){
 let templates = require('../viewDeliveries/delTemp');
-
+let storage = require('../localStorage');
 let Cart = []
 let sum = 0;
+
+function writeProductsInLocalStorage() {
+    let array = [];
+    for (let i = 0; i < Cart.length;i++){
+        array.push(Cart[i]);
+    }
+    storage.set("productsInCart",JSON.stringify(array));
+
+}
 
 function addToCart(product){
     if (!containsObject(product,Cart)) {
@@ -899,10 +908,8 @@ function addToCart(product){
     else{
         console.log('exist');
     }
-    sum = 0;
-    for (let i = 0; i < Cart.length;i++){
-        sum += Cart[i].product.cost * Cart[i].quantity;
-    }
+
+    writeProductsInLocalStorage();
     $('#cart-len').text(Cart.length);
     console.log(Cart);
 }
@@ -919,10 +926,26 @@ function containsObject(obj, list) {
 }
 let $modalText = $('.modal-body');
 
+function getCart() {
+    return Cart;
+}
+
+function setCart(newCart){
+    Cart = newCart;
+}
+
+function calculateSum() {
+    sum = 0;
+    for (let i = 0; i < Cart.length;i++){
+        sum += Cart[i].product.cost * Cart[i].quantity;
+    }
+    return sum;
+}
+
 function showProductInCart() {
     $modalText.html('');
 
-    $("#totalSum").text(sum);
+    $("#totalSum").text(calculateSum());
     function showOneProductInCart(product) {
         let html_code =templates.cartItem({product:product});
         let $node = $(html_code);
@@ -930,13 +953,14 @@ function showProductInCart() {
         $modalText.append($node);
     }
     Cart.forEach(showOneProductInCart);
-    console.log($modalText);
 }
 exports.showProductInCart = showProductInCart;
 exports.addToCart = addToCart;
+exports.getCart = getCart;
+exports.setCart = setCart;
 
 
-},{"../viewDeliveries/delTemp":15}],10:[function(require,module,exports){
+},{"../localStorage":2,"../viewDeliveries/delTemp":14}],10:[function(require,module,exports){
 const server = require('../API');
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
@@ -978,64 +1002,20 @@ function loadProfile() {
 exports.loadProfile = loadProfile;
 
 },{"../API":1}],11:[function(require,module,exports){
-function getProducts() {
-    let products = [
-        {
-            id: 1,
-            description: "Some description 0",
-            date: "Date 0",
-            cost: 100,
-            icon:'../images/klein.jpg',
-        },
-        {
-            id: 2,
-            description: "Some description 1",
-            date: "Date 1",
-            cost: 10,
-            icon:'../images/cube.png',
-        },
-        {
-            id: 3,
-            description: "Some description 2",
-            date: "Date 2",
-            cost: 1,
-            icon:'../images/mebius.jpg',
-        },
-        {
-            id: 4,
-            description: "Some description 3",
-            date: "Date 3",
-            cost: 200,
-            icon:'../images/menger_sponge.gif',
-        },
-        {
-            id: 5,
-            description: "Some description 4",
-            date: "Date 4",
-            cost: 1,
-            icon:'../images/mebius.jpg',
-        },
-        {
-            id: 6,
-            description: "Some description 5",
-            date: "Date 5",
-            cost: 200,
-            icon:'../images/mebius.jpg',
-        }
-    ];
-    return products;
-}
-
-exports.getProducts = getProducts;
-},{}],12:[function(require,module,exports){
-let products = require('../shop/products');
 let $products = $('#products');
+let storage = require('../localStorage');
 const templates = require('../viewDeliveries/delTemp');
 const ProductCart = require('../productCart/Cart');
 let productList = []
 let API = require('../API')
 function initializeProducts() {
     let products;
+    let json_data = storage.get('productsInCart');
+    if (json_data){
+        let array = JSON.parse(json_data);
+        ProductCart.setCart(array)
+        $("#cart-len").text(array.length);
+    }
     API.getProducts([],function (err, data) {
         products = [];
         if (err) {
@@ -1061,32 +1041,42 @@ function initializeProducts() {
     });
 }
 
-function fromServer(error, data) {
-    if (!error){
-        LiqPayCheckout.init({
-            data:	data.data,
-            signature:	data.signature,
-            embedTo:	"#liqpay",
-            mode:	"popup"	//	embed	||	popup
-        }).on("liqpay.callback",	function(data){
-            console.log(data.status);
-            console.log(data);
-        }).on("liqpay.ready",	function(data){
-//	ready
-        }).on("liqpay.close",	function(data){
-//	close
-        });
-    }
-}
-
 $('#buyProducts').click(function (){
+    if (ProductCart.getCart().length===0){
+        console.log(ProductCart.getCart());
+        alert("Cart is empty");
+        return;
+    }
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, '0');
+    let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    let yyyy = today.getFullYear();
+    today = yyyy + '-' + mm + '-' + dd;
     console.log('hello');
     let sum = $("#totalSum").text();
-    let order = {
-        amount: sum,
-        description: "Cool math stuff"
+    let delivery = {
+        name: storage.get("name"),
+        surname: storage.get("surname"),
+        phone: storage.get("country-code") + storage.get("phone"),
+        destination: storage.get("destination"),
+        date: today,
+        cost: sum,
+        status: "sent",
+        description: "Cool math stuff",
+        paid: "false",
+        payer: "Sender"
     };
-    API.createPayment(order, fromServer);
+    let user = JSON.parse(sessionStorage.getItem('user'));
+    let data = {
+        delivery: delivery,
+        user: user
+    }
+    API.createDelivery(data, function (error, data) {
+        if (error){
+            console.log("Wrong in creating delivery from shop products");
+        }
+    });
+    $('#myModal').css("display","none");
 });
 
 function update () {
@@ -1095,7 +1085,7 @@ function update () {
         let html_code =templates.shopIitem({product:product});
         let $node = $(html_code);
 
-        $node.find('.buyProduct').click(function () {
+        $node.find('.addProductToCart').click(function () {
             ProductCart.addToCart(product);
         });
         $products.append($node);
@@ -1131,7 +1121,7 @@ window.onclick = function(event) {
 }
 
 exports.initializeProducts = initializeProducts;
-},{"../API":1,"../productCart/Cart":9,"../shop/products":11,"../viewDeliveries/delTemp":15}],13:[function(require,module,exports){
+},{"../API":1,"../localStorage":2,"../productCart/Cart":9,"../viewDeliveries/delTemp":14}],12:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -1299,7 +1289,7 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],14:[function(require,module,exports){
+},{"../API":1}],13:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
 const serverInteract = require('../API');
@@ -1692,16 +1682,16 @@ $('#delivery-info').on('hide.bs.modal', function () {
 $('[data-toggle="tooltip"]').tooltip();
 
 exports.initializeArchive = initializeArchive;
-},{"../API":1,"./delTemp":15,"./deliveriesList":16}],15:[function(require,module,exports){
+},{"../API":1,"./delTemp":14,"./deliveriesList":15}],14:[function(require,module,exports){
 
 const ejs = require('ejs');
 
 exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=description%>\"><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=date%>\"><span><%=date%></span></div>\r\n        <div class = 'item-cost' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=cost%>₴\"><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
 
-exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"buyProduct\">Buy</button>\r\n</div>");
+exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"addProductToCart\">Buy</button>\r\n</div>");
 
 exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n</div>");
-},{"ejs":19}],16:[function(require,module,exports){
+},{"ejs":18}],15:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
         {
@@ -1751,7 +1741,7 @@ function getDeliveries() {
 }
 
 exports.getDeliveries = getDeliveries;
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function () {
 	// Basil
 	var Basil = function (options) {
@@ -2156,9 +2146,9 @@ exports.getDeliveries = getDeliveries;
 
 })();
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -3099,7 +3089,7 @@ if (typeof window != 'undefined') {
   window.ejs = exports;
 }
 
-},{"../package.json":21,"./utils":20,"fs":18,"path":22}],20:[function(require,module,exports){
+},{"../package.json":20,"./utils":19,"fs":17,"path":21}],19:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -3280,7 +3270,7 @@ exports.hyphenToCamel = function (str) {
   return str.replace(/-[a-z]/g, function (match) { return match[1].toUpperCase(); });
 };
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports={
   "_from": "ejs@^3.1.6",
   "_id": "ejs@3.1.6",
@@ -3356,7 +3346,7 @@ module.exports={
   "version": "3.1.6"
 }
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -3889,7 +3879,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":23}],23:[function(require,module,exports){
+},{"_process":22}],22:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
