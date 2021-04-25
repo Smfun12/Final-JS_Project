@@ -8,7 +8,7 @@ let storage = require('../localStorage');
 $('#input-name').on('input', function () {
     let correct = true;
     let name = this.value;
-    if (name.length === 0) {
+    if (name.length < 5) {
         correct = false
     } else for (let j = 0; j < name.length; j++) {
         let cur = name.charAt(j);
@@ -35,7 +35,7 @@ $('#input-name').on('input', function () {
 $('#input-surname').on('input', function () {
     let correct = true;
     let surname = this.value;
-    if (surname.length === 0) {
+    if (surname.length < 5) {
         correct = false
     } else for (let j = 0; j < surname.length; j++) {
         let cur = surname.charAt(j);

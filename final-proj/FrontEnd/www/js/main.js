@@ -211,6 +211,10 @@ $('#pay').click(function () {
 $('#pay-txt').click(function () {
     $('#pay').click();
 });
+
+$('.icon').on('click',function () {
+    window.location.href = 'http://localhost:3989/';
+})
 },{}],6:[function(require,module,exports){
 let nameCorrect = false;
 let surnameCorrect = false;
@@ -222,7 +226,7 @@ let storage = require('../localStorage');
 $('#input-name').on('input', function () {
     let correct = true;
     let name = this.value;
-    if (name.length === 0) {
+    if (name.length < 5) {
         correct = false
     } else for (let j = 0; j < name.length; j++) {
         let cur = name.charAt(j);
@@ -249,7 +253,7 @@ $('#input-name').on('input', function () {
 $('#input-surname').on('input', function () {
     let correct = true;
     let surname = this.value;
-    if (surname.length === 0) {
+    if (surname.length < 5) {
         correct = false
     } else for (let j = 0; j < surname.length; j++) {
         let cur = surname.charAt(j);
@@ -1176,12 +1180,12 @@ $('#main-reset-btn').on('click', function () {
                 email: emailAddress,
                 password: password
             }, function (err, data) {
-                sessionStorage.setItem('user',JSON.stringify(data));
+                // sessionStorage.setItem('user',JSON.stringify(data));
                 console.log(sessionStorage.getItem('user'));
                 server.homePage(function (error, data) {
                     if (!error){
                         console.log(data);
-                        window.location.href="http://localhost:3989";
+                        window.location.href="http://localhost:3989/login.html";
                     }
                 });
             });

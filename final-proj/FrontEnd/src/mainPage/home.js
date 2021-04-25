@@ -44,3 +44,7 @@ $('#pay').click(function () {
 $('#pay-txt').click(function () {
     $('#pay').click();
 });
+
+$('.icon').on('click',function () {
+    window.location.href = 'http://localhost:3989/';
+})

@@ -1,13 +1,27 @@
 @import "../navbar";
+@import "../home-icon";
 body{
-  background-image: url('../../images/blackhole.jpg');
+  //background-image: url('../../images/blackhole.jpg');
   overflow-x: hidden;
+}
+#myVideo {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.sorting{
+  z-index: 1;
 }
 
 .product-list{
   margin: 10px;
   background-color: #37aaae;
   width: min-content;
+  opacity: 0.8;
   p{
     margin: 10px;
     font-size: 12px;

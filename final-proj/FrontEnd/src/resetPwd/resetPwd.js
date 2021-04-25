@@ -42,12 +42,12 @@ $('#main-reset-btn').on('click', function () {
                 email: emailAddress,
                 password: password
             }, function (err, data) {
-                sessionStorage.setItem('user',JSON.stringify(data));
+                // sessionStorage.setItem('user',JSON.stringify(data));
                 console.log(sessionStorage.getItem('user'));
                 server.homePage(function (error, data) {
                     if (!error){
                         console.log(data);
-                        window.location.href="http://localhost:3989";
+                        window.location.href="http://localhost:3989/login.html";
                     }
                 });
             });
