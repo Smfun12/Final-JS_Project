@@ -44,6 +44,9 @@ function configureEndpoints(app) {
     app.get('/signup.html', pages.signUpPage);
 
     app.get('/login.html', pages.loginPage);
+    app.get('/resetPwd.html', pages.reserPwdPage);
+    app.post('/resetPwd.html', api.checkUserByEmail);
+    app.post('/api/modify-user', api.modifyUser);
     app.post('/login.html', api.createUser);
 
     app.get('/profile.html', pages.profilePage);

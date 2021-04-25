@@ -59,6 +59,10 @@ exports.modifyDelivery = function (data, callback) {
     backendPost('/api/modify-delivery/', data, callback);
 }
 
-exports.getProducts = function (data, callback) {
-    backendPost('/api/get-products/',data, callback);
+exports.checkUserByEmail = function (data, callback) {
+    backendPost('/resetPwd.html', data, callback);
+}
+
+exports.modifyUser = function (data, callback) {
+    backendPost('/api/modify-user', data, callback);
 }

@@ -6,14 +6,13 @@ let codeResent = 0;
 
 let API = require('../API');
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-    //max & min inclusive
-}
-
 function sendMail(name, surname, email) {
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+        //max & min inclusive
+    }
     const code = getRandomInt(1000, 9999);
     Email.send({
         Host: "smtp.gmail.com",
@@ -28,7 +27,7 @@ function sendMail(name, surname, email) {
                 + code,
     })
         .then(function (message) {
-            //alert("mail sent successfully")
+            // alert("mail sent successfully")
         });
     return code;
 }
@@ -164,3 +163,5 @@ function parsePwd(password){
     const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/;//Minimum eight characters, at least one letter and one number
     return re.test(password);
 }
+
+exports.sendMail = sendMail;
