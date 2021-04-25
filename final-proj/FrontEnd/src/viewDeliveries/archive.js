@@ -54,7 +54,7 @@ function initializeArchive() {
                 deliveries[i].destination += "...";
             }
         }
-        deliveries.sort(sortByStatusAsc);
+        if (deliveries) deliveries.sort(sortByStatusAsc);
         updateArchive();
     });
 }
@@ -98,49 +98,49 @@ $('#status').on('click', function() {
 
 $('#date-arrow-down').on('click', function () {
     templateForArrowClick('date', 'down');
-    deliveries.sort(sortByDateDesc);
+    if (deliveries) deliveries.sort(sortByDateDesc);
     updateArchive();
 });
 
 $('#date-arrow-up').on('click', function () {
     templateForArrowClick('date', 'up');
-    deliveries.sort(sortByDateAsc);
+    if (deliveries) deliveries.sort(sortByDateAsc);
     updateArchive();
 });
 
 $('#status-arrow-down').on('click', function () {
    templateForArrowClick('status', 'down');
-    deliveries.sort(sortByStatusDesc);
+    if (deliveries) deliveries.sort(sortByStatusDesc);
     updateArchive();
 });
 
 $('#status-arrow-up').on('click', function () {
     templateForArrowClick('status', 'up');
-    deliveries.sort(sortByStatusAsc);
+    if (deliveries) deliveries.sort(sortByStatusAsc);
     updateArchive();
 });
 
 $('#dest-arrow-down').on('click', function () {
     templateForArrowClick('dest', 'down');
-    deliveries.sort(sortByDestinationDesc);
+    if (deliveries) deliveries.sort(sortByDestinationDesc);
     updateArchive();
 });
 
 $('#dest-arrow-up').on('click', function () {
     templateForArrowClick('dest', 'up');
-    deliveries.sort(sortByDestinationAsc);
+    if (deliveries) deliveries.sort(sortByDestinationAsc);
     updateArchive();
 });
 
 $('#cost-arrow-down').on('click', function () {
     templateForArrowClick('cost', 'down');
-    deliveries.sort(sortByCostDesc);
+    if (deliveries) deliveries.sort(sortByCostDesc);
     updateArchive();
 });
 
 $('#cost-arrow-up').on('click', function () {
     templateForArrowClick('cost', 'up');
-    deliveries.sort(sortByCostAsc);
+    if (deliveries) deliveries.sort(sortByCostAsc);
     updateArchive();
 });
 
@@ -209,19 +209,19 @@ function templateToSortByOtherVal(sortBy) {
     let text = 'Delivery ';
     if (sortBy === 'date') {
         text += "Date";
-        deliveries.sort(sortByDateAsc);
+        if (deliveries) deliveries.sort(sortByDateAsc);
     }
     if (sortBy === 'dest') {
         text += "Destination";
-        deliveries.sort(sortByDestinationAsc);
+        if (deliveries) deliveries.sort(sortByDestinationAsc);
     }
     if (sortBy === 'cost') {
         text += "Cost";
-        deliveries.sort(sortByCostAsc);
+        if (deliveries) deliveries.sort(sortByCostAsc);
     }
     if (sortBy === 'status') {
         text += "Status";
-        deliveries.sort(sortByStatusAsc);
+        if (deliveries) deliveries.sort(sortByStatusAsc);
     }
     $('.slideup-for-sort span').text(text);
     $('#main-arrow-down').css('display', 'none');
@@ -272,6 +272,7 @@ function sortByCostDesc(delivery1, delivery2) {
 
 function updateArchive () {
     $delList.html("");
+    if (!deliveries) return;
     for (let i = 0; i < deliveries.length; i++) {
         let html_code = templates.deliveryItem({
             numId: -(i + 1),
