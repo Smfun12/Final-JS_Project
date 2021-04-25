@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     database: "js_project",
-    password: "Bydandyld03/29",
+    password: "root",
     timezone: "local"
 });
 
@@ -268,7 +268,7 @@ exports.createPayment = function(req, res) {
 };
 
 function base64(str) {
-    return new Buffer(str).toString('base64');
+    return new Buffer.from(str).toString('base64');
 }
 
 function sha1(string) {

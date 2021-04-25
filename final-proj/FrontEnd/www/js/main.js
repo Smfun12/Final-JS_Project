@@ -141,6 +141,7 @@ $(function () {
 
     let shopPage = require('./shop/shop');
     let productCart = require('./productCart/Cart');
+    productCart.initCart();
     shopPage.initializeProducts();
     try {
         archivePage.initializeArchive();
@@ -983,6 +984,16 @@ let templates = require('../viewDeliveries/delTemp');
 let storage = require('../localStorage');
 let Cart = []
 let sum = 0;
+let shop = require('../shop/shop')
+
+function initCart() {
+    let json_data = storage.get('productsInCart');
+    if (json_data){
+        let array = JSON.parse(json_data);
+        setCart(array);
+        $("#cart-len").text(array.length);
+    }
+}
 
 function writeProductsInLocalStorage() {
     let array = [];
@@ -1029,6 +1040,15 @@ function setCart(newCart){
     Cart = newCart;
 }
 
+function removeFromCart(cart_item) {
+    //Видалити піцу з кошика
+
+    let number = Cart.indexOf(cart_item);
+    Cart.splice(number,1);
+
+    //Після видалення оновити відображення
+    showProductInCart();
+}
 function calculateSum() {
     sum = 0;
     for (let i = 0; i < Cart.length;i++){
@@ -1039,12 +1059,16 @@ function calculateSum() {
 
 function showProductInCart() {
     $modalText.html('');
-
+    writeProductsInLocalStorage();
     $("#totalSum").text(calculateSum());
+    $('#cart-len').text(Cart.length);
     function showOneProductInCart(product) {
         let html_code =templates.cartItem({product:product});
         let $node = $(html_code);
-
+        $node.find('#removeFromCart').on('click',function () {
+            console.log('Removing from cart');
+            removeFromCart(product);
+        })
         $modalText.append($node);
     }
     Cart.forEach(showOneProductInCart);
@@ -1053,9 +1077,9 @@ exports.showProductInCart = showProductInCart;
 exports.addToCart = addToCart;
 exports.getCart = getCart;
 exports.setCart = setCart;
+exports.initCart = initCart;
 
-
-},{"../localStorage":2,"../viewDeliveries/delTemp":14}],10:[function(require,module,exports){
+},{"../localStorage":2,"../shop/shop":11,"../viewDeliveries/delTemp":14}],10:[function(require,module,exports){
 const server = require('../API');
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
@@ -1105,12 +1129,7 @@ let productList = []
 let API = require('../API')
 function initializeProducts() {
     let products;
-    let json_data = storage.get('productsInCart');
-    if (json_data){
-        let array = JSON.parse(json_data);
-        ProductCart.setCart(array)
-        $("#cart-len").text(array.length);
-    }
+
     API.getProducts([],function (err, data) {
         products = [];
         if (err) {
@@ -1132,7 +1151,7 @@ function initializeProducts() {
                 icon: products[i].icon,
             });
         }
-        update();
+        updateShop();
     });
 }
 
@@ -1171,10 +1190,55 @@ $('#buyProducts').click(function (){
             console.log("Wrong in creating delivery from shop products");
         }
     });
+    alert('Great! Check deliveries to see your order')
+
     $('#myModal').css("display","none");
 });
+let ascPrice = 0;
+let ascDescription = 0;
+function sortByCostAsc(product1, product2) {
+    if (product1.cost < product2.cost) return -1;
+    else if (product1.cost === product2.cost) return 0;
+    else return 1;
+}
 
-function update () {
+function sortByCostDesc(product1, product2) {
+    return -sortByCostAsc(product1, product2);
+}
+function sortByDescriptionAsc(product1, product2) {
+    if (product1.description < product2.description) return -1;
+    else if (product1.description === product2.description) return 0;
+    else return 1;
+}
+
+function sortByDescriptionDesc(product1, product2) {
+    return -sortByDescriptionAsc(product1, product2);
+}
+$("#price").on('click',function () {
+    if (ascPrice===0){
+        productList.sort(sortByCostAsc);
+        ascPrice = 1;
+    }
+    else{
+        productList.sort(sortByCostDesc);
+        ascPrice = 0;
+    }
+    updateShop();
+})
+
+$("#description").on('click',function () {
+    if (ascDescription===0){
+        productList.sort(sortByDescriptionAsc);
+        ascDescription = 1;
+    }
+    else{
+        productList.sort(sortByDescriptionDesc);
+        ascDescription = 0;
+    }
+    updateShop();
+})
+
+function updateShop () {
     $products.html("");
     function showOneProduct(product){
         let html_code =templates.shopIitem({product:product});
@@ -1187,19 +1251,25 @@ function update () {
         }
 
     productList.forEach(showOneProduct);
-
 }
 
+if (window.location.href !=='http://localhost:3989/shop.html'){
+    $('#basket').css('display','none');
+    $('#cart-len').css('display','none');
 
+}
 // Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
+let span = document.getElementsByClassName("close")[0];
 let $modal = $('#myModal');
 // When the user clicks on the button, open the modal
 $('#basket').click(function () {
    $modal.css('display','block');
    ProductCart.showProductInCart();
 });
-
+$('#cart-len').click(function () {
+    $modal.css('display','block');
+    ProductCart.showProductInCart();
+});
 
 // When the user clicks on <span> (x), close the modal
 if (span) {
@@ -1208,14 +1278,8 @@ if (span) {
     }
 }
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target === $modal) {
-        $modal.css('display','none');
-    }
-}
-
 exports.initializeProducts = initializeProducts;
+exports.updateShop = updateShop;
 },{"../API":1,"../localStorage":2,"../productCart/Cart":9,"../viewDeliveries/delTemp":14}],12:[function(require,module,exports){
 let firstname;
 let lastname;
@@ -1785,7 +1849,7 @@ exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>
 
 exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"addProductToCart\">Buy</button>\r\n</div>");
 
-exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n</div>");
+exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n    <button class=\"btn btn-danger\" id=\"removeFromCart\">Remove</button>\r\n</div>");
 },{"ejs":18}],15:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [

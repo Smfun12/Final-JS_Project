@@ -10,6 +10,7 @@ $(function () {
 
     let shopPage = require('./shop/shop');
     let productCart = require('./productCart/Cart');
+    productCart.initCart();
     shopPage.initializeProducts();
     try {
         archivePage.initializeArchive();
