@@ -169,10 +169,6 @@ $('#my-dels').click(function () {
     window.location.href = 'http://localhost:3989/archive.html';
 });
 
-$('#my-dels-txt').click(function () {
-    $('#my-dels').click();
-});
-
 $('#new-del').click(function () {
     if (sessionStorage.getItem('user') === null) {
         window.location.href = 'http://localhost:3989/signup.html';
@@ -180,10 +176,6 @@ $('#new-del').click(function () {
     else {
         window.location.href = 'http://localhost:3989/order.html';
     }
-});
-
-$('#new-del-txt').click(function () {
-    $('#new-del').click();
 });
 
 $('#mini-shop').click(function () {
@@ -195,10 +187,6 @@ $('#mini-shop').click(function () {
     }
 });
 
-$('#mini-shop-txt').click(function () {
-    $('#mini-shop').click();
-});
-
 $('#pay').click(function () {
     if (sessionStorage.getItem('user') === null) {
         window.location.href = 'http://localhost:3989/signup.html';
@@ -208,10 +196,12 @@ $('#pay').click(function () {
     }
 });
 
-$('#pay-txt').click(function () {
-    $('#pay').click();
-});
-
+if (window.location.href === 'http://localhost:3989/'){
+    $('.icon').css('display','none');
+}
+else{
+    $('.icon').css('display','block');
+}
 $('.icon').on('click',function () {
     window.location.href = 'http://localhost:3989/';
 })
@@ -1098,8 +1088,10 @@ exports.initCart = initCart;
 const server = require('../API');
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
+    console.log(user);
     $('#profileEmail').text(user.email);
     $('#full_name').text(user.name);
+    $('#user_phone').text(user.phone);
 }
 $("#sign_out").on('click', function () {
     sessionStorage.removeItem('user');
