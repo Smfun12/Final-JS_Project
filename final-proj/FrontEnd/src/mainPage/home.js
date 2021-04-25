@@ -44,7 +44,6 @@ let $modal = $('#myModal');
 // When the user clicks on the button, open the modal
 $('#brand').click(function () {
     $modal.css('display','block');
-    ProductCart.showProductInCart();
 });
 
 // When the user clicks on <span> (x), close the modal
