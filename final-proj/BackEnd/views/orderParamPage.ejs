@@ -13,13 +13,13 @@
 
 <div class="container">
     <img src="./images/mercury.gif" class="planet-gif" id="mercury-gif" data-toggle="tooltip" data-placement="top" title="Mercury">
-    <img src="./images/venus.gif" class="planet-gif" id="venus-gif">
-    <img src="./images/Earth.gif" class="planet-gif" id="earth-gif">
-    <img src="./images/Mars.gif" class="planet-gif" id="mars-gif">
-    <img src="./images/jupiter.gif" class="planet-gif" id="jupiter-gif">
-    <img src="./images/saturn.png" class="planet-gif" id="saturn-gif">
-    <img src="./images/uranus.gif" class="planet-gif" id="uranus-gif">
-    <img src="./images/Neptune.gif" class="planet-gif" id="neptune-gif">
+    <img src="./images/venus.gif" class="planet-gif" id="venus-gif" data-toggle="tooltip" data-placement="top" title="Venus">
+    <img src="./images/Earth.gif" class="planet-gif" id="earth-gif" data-toggle="tooltip" data-placement="top" title="Earth">
+    <img src="./images/Mars.gif" class="planet-gif" id="mars-gif" data-toggle="tooltip" data-placement="top" title="Mars">
+    <img src="./images/jupiter.gif" class="planet-gif" id="jupiter-gif" data-toggle="tooltip" data-placement="top" title="Jupiter">
+    <img src="./images/saturn.png" class="planet-gif" id="saturn-gif" data-toggle="tooltip" data-placement="top" title="Saturn">
+    <img src="./images/uranus.gif" class="planet-gif" id="uranus-gif" data-toggle="tooltip" data-placement="top" title="Uranus">
+    <img src="./images/Neptune.gif" class="planet-gif" id="neptune-gif" data-toggle="tooltip" data-placement="top" title="Neptune">
 
     <div class="row">
         <label id="label-head-param"> Please enter the information about the delivery </label>
@@ -74,10 +74,31 @@
             </div>
             <div class="modal-body">
                 <p>
-                    <span id="span-name"></span><br>
-                    <span id="span-surname"></span><br>
-                    <span id="span-phone"></span><br>
-                    <span id="span-destination"></span><br>
+                    <span>Name:
+                        <span id="span-name"></span>
+                        <input type="text" id="name-alter"><br>
+                    </span>
+                    <span>Surname:
+                        <span id="span-surname"></span>
+                        <input type="text" id="surname-alter"><br>
+                    </span>
+                    <span>Phone:
+                        <span id="span-phone"></span>
+                        <input type="text" id="phone-alter"><br>
+                    </span>
+                    <span>Destination:
+                        <span id="span-destination"></span>
+                        <select name="dest-alter" id="dest-alter">
+                            <option value="Mercury">Mercury</option>
+                            <option value="Venus">Venus</option>
+                            <option value="Earth">Earth</option>
+                            <option value="Mars">Mars</option>
+                            <option value="Jupiter">Jupiter</option>
+                            <option value="Saturn">Saturn</option>
+                            <option value="Uranus">Uranus</option>
+                            <option value="Neptune">Neptune</option>
+                        </select><br>
+                    </span>
                     <span id="span-weight"></span><br>
                     <span id="span-description"></span><br>
                     <span id="span-date"></span><br>

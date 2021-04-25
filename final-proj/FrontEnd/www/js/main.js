@@ -340,21 +340,21 @@ today = yyyy + '-' + mm + '-' + dd;
 let payer = "Sender";
 
 function showGif() {
-    if (storage.get('destination') === 'mercury') {
+    if (storage.get('destination') === 'Mercury') {
         $('#mercury-gif').show();
-    } else if (storage.get('destination') === 'venus') {
+    } else if (storage.get('destination') === 'Venus') {
         $('#venus-gif').show();
-    } else if (storage.get('destination') === 'earth') {
+    } else if (storage.get('destination') === 'Earth') {
         $('#earth-gif').show();
-    } else if (storage.get('destination') === 'mars') {
+    } else if (storage.get('destination') === 'Mars') {
         $('#mars-gif').show();
-    } else if (storage.get('destination') === 'jupiter') {
+    } else if (storage.get('destination') === 'Jupiter') {
         $('#jupiter-gif').show();
-    } else if (storage.get('destination') === 'saturn') {
+    } else if (storage.get('destination') === 'Saturn') {
         $('#saturn-gif').show();
-    } else if (storage.get('destination') === 'uranus') {
+    } else if (storage.get('destination') === 'Uranus') {
         $('#uranus-gif').show();
-    } else if (storage.get('destination') === 'neptune') {
+    } else if (storage.get('destination') === 'Neptune') {
         $('#neptune-gif').show();
     }
 }
@@ -413,10 +413,10 @@ $('#final-order').click(function () {
 
     orderData = data;
 
-    $('#span-name').text("name: " + data.name);
-    $('#span-surname').text('surname: ' + data.surname);
-    $('#span-phone').text("phone: " + data.phone);
-    $('#span-destination').text("destination: " + data.destination);
+    $('#span-name').text(data.name);
+    $('#span-surname').text(data.surname);
+    $('#span-phone').text(data.phone);
+    $('#span-destination').text(data.destination);
     $('#span-weight').text("weight: " + data.weight);
     $('#span-description').text("description: " + data.description);
     $('#span-date').text("date: " + data.date);
@@ -424,6 +424,101 @@ $('#final-order').click(function () {
     $('#span-status').text("status: " + data.status);
     $('#span-payer').text("payer: " + data.payer);
 });
+
+$('#span-name').click(function () {
+    $('#name-alter').val($(this).text());
+    $(this).hide();
+    $('#name-alter').show();
+    $('#name-alter').focus();
+});
+
+$('#name-alter').focusout(function () {
+    $(this).hide();
+    let name = $(this).val();
+    if (parseName(name)) {
+        $('#span-name').text(name);
+        orderData.name = $(this).val();
+    }
+    $('#span-name').show();
+});
+
+$('#span-surname').click(function () {
+    $('#surname-alter').val($(this).text());
+    $(this).hide();
+    $('#surname-alter').show();
+    $('#surname-alter').focus();
+});
+
+$('#surname-alter').focusout(function () {
+    $(this).hide();
+    let surname = $(this).val();
+    if (parseName(surname)) {
+        $('#span-surname').text(surname);
+        orderData.surname = $(this).val();
+    }
+    $('#span-surname').show();
+});
+
+$('#span-phone').click(function () {
+    $('#phone-alter').val($(this).text());
+    $(this).hide();
+    $('#phone-alter').show();
+    $('#phone-alter').focus();
+});
+
+$('#phone-alter').focusout(function () {
+    $(this).hide();
+    let phone = $(this).val();
+    if (parsePhone(phone)) {
+        $('#span-phone').text(phone);
+        orderData.phone = $(this).val();
+    }
+    $('#span-phone').show();
+});
+
+$('#span-destination').click(function () {
+    $(this).hide();
+    $('#dest-alter').show();
+    $('#dest-alter').focus();
+});
+
+$('#dest-alter').change(function () {
+    let dest = $(this).val();
+    $('#span-destination').text(dest);
+    orderData.destination = dest;
+});
+
+$('#dest-alter').focusout(function () {
+    $(this).hide();
+    $('#span-destination').show();
+});
+
+function parseName(name) {
+    let correct = true;
+    if (name.length === 0) {
+        correct = false
+    } else for (let j = 0; j < name.length; j++) {
+        let cur = name.charAt(j);
+        if ((cur < 'A' || cur > 'Z') && (cur < 'a' || cur > 'z') && cur !== "'" && cur !== '-') {
+            correct = false;
+        }
+    }
+
+    return correct;
+}
+
+function parsePhone(phone) {
+    if (phone.length < 2 || phone.charAt(0) !== '+') {
+        return false;
+    } else for (let j = 1; j < phone.length; j++) {
+        let cur = phone.charAt(j);
+        if (cur < '0' || cur > '9') {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 let ismousedown;
 jQuery.fn.draggit = function (el, doSmth) {
