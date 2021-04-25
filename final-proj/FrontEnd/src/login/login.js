@@ -53,3 +53,5 @@ $('#sendUserData').on('click', function () {
     console.log(user_data);
     API.checkUserInSystem(user_data, sendToBack);
 });
+
+exports.parsePwd = parsePwd;

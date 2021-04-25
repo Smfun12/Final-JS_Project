@@ -54,3 +54,9 @@ exports.orderParamPage = function(req, res) {
         pageTitle: 'Order a Delivery'
     });
 };
+
+exports.reserPwdPage = function(req, res) {
+    res.render('resetPwdPage', {
+        pageTitle: 'Reset Password'
+    });
+}

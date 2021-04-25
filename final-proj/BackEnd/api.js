@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     database: "js_project",
-    password: "Bydandyld03/29",
+    password: "root",
     timezone: "local"
 });
 
@@ -40,13 +40,15 @@ exports.checkUserInSystem = function (req, res) {
             }
             console.log(results[0].password);
             console.log(user.password);
-            if (results[0].email === user.email && bcrypt.compareSync(user.password, results[0].password)){
-                console.log('Match');
-                exist = true;
-                user.name = results[0].name;
-                res.send(user);
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].email === user.email && bcrypt.compareSync(user.password, results[i].password)){
+                    console.log('Match');
+                    exist = true;
+                    user.name = results[i].name;
+                    res.send(user);
+                }
             }
-            else {
+            if (!exist) {
                 console.log('Does not Match');
                 res.send([]);
             }
@@ -254,4 +256,55 @@ function sha1(string) {
     var sha1 = crypto.createHash('sha1');
     sha1.update(string);
     return sha1.digest('base64');
+}
+
+exports.checkUserByEmail = function (req, res) {
+    let email = req.body.email;
+    console.log('Check user by email: ', email);
+    let query = 'select * from users where email = "' + email + '"';
+    connection.query(query, function (err, result) {
+        if (err) {
+            console.log(err.toString());
+            return;
+        }
+        if (result && result.length > 0) res.send('true');
+        else res.send('false');
+    });
+};
+
+exports.modifyUser = function (req, res) {
+    console.log('Array: ', array);
+    let user = req.body;
+    console.log("query: ", 'select * from users where email = "' + user.email + '"');
+    connection.query('select * from users where email = "' + user.email + '"', function (e, result){
+        if (e) {
+            console.log(e.toString());
+            return;
+        }
+        let oldUser = result[0];
+        oldUser.password = bcrypt.hashSync(user.password, 10);
+        let db_user = [oldUser.name, oldUser.email, oldUser.password];
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].email === oldUser.email) {
+                array.splice(i, 1);
+                return;
+            }
+        }
+        let updateQuery = 'update users set password = "' + oldUser.password + '" where id = ' +
+            oldUser.id;
+        console.log(updateQuery);
+        connection.query(updateQuery, function (error, rr) {
+            if (error) {
+                console.log(error.toString());
+                return;
+            }
+            console.log('Success***');
+            res.send({
+                name: oldUser.name,
+                email: oldUser.email,
+                password: user.password
+            });
+        });
+    });
+
 }

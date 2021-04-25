@@ -8,6 +8,8 @@ $(function () {
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
 
+    let resetPwdPage = require('./resetPwd/resetPwd');
+
     let shopPage = require('./shop/shop');
     let productCart = require('./productCart/Cart');
     shopPage.initializeProducts();
