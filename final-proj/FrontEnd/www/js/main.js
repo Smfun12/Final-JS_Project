@@ -59,6 +59,10 @@ exports.createDelivery = function (data, callback) {
 exports.modifyDelivery = function (data, callback) {
     backendPost('/api/modify-delivery/', data, callback);
 }
+
+exports.getProducts = function (data, callback) {
+    backendPost('/api/get-products/',data, callback);
+}
 },{}],2:[function(require,module,exports){
 var basil = require('basil.js');
 basil = new basil();
@@ -949,7 +953,6 @@ function getProducts() {
             description: "Some description 0",
             date: "Date 0",
             cost: 100,
-            status: "Status 0",
             icon:'../images/klein.jpg',
         },
         {
@@ -957,15 +960,13 @@ function getProducts() {
             description: "Some description 1",
             date: "Date 1",
             cost: 10,
-            status: "Status 1",
-            icon:'./images/cube.png',
+            icon:'../images/cube.png',
         },
         {
             id: 3,
             description: "Some description 2",
             date: "Date 2",
             cost: 1,
-            status: "Status 2",
             icon:'../images/mebius.jpg',
         },
         {
@@ -973,23 +974,20 @@ function getProducts() {
             description: "Some description 3",
             date: "Date 3",
             cost: 200,
-            status: "Status 3",
-            icon:'../images/mebius.jpg',
+            icon:'../images/menger_sponge.gif',
         },
         {
             id: 5,
             description: "Some description 4",
             date: "Date 4",
             cost: 1,
-            status: "Status 4",
-            icon:'./images/mebius.jpg',
+            icon:'../images/mebius.jpg',
         },
         {
             id: 6,
             description: "Some description 5",
             date: "Date 5",
             cost: 200,
-            status: "Status 5",
             icon:'../images/mebius.jpg',
         }
     ];
@@ -1001,40 +999,63 @@ exports.getProducts = getProducts;
 let products = require('../shop/products');
 let $products = $('#products');
 const templates = require('../viewDeliveries/delTemp');
-const PizzaCart = require('../productCart/Cart');
+const ProductCart = require('../productCart/Cart');
 let productList = []
+let API = require('../API')
 function initializeProducts() {
-    productList = products.getProducts();
-    if (products.length === 0) {
-        $('#is-paid').css('display', 'block');
-    }
-    for (let i = 0; i < productList.length; i++) {
-        productList[i] = {
-            id: productList[i].id,
-            description: productList[i].description,
-            date: productList[i].date,
-            cost: productList[i].cost,
-            status: productList[i].status,
-            icon: productList[i].icon,
-            fullStatus: productList[i].status,
+    let products;
+    API.getProducts([],function (err, data) {
+        products = [];
+        if (err) {
+            console.log(err.toString());
+            return;
+        } else {
+            products = data;
         }
-        if(productList[i].status.length > 12) {
-            productList[i].status = productList[i].status.substring(0, 9);
-            productList[i].status += "...";
+        // console.log('hello from back',products);
+        if (products.length === 0) {
+            $('#is-empty').css('display', 'block');
         }
-    }
-    productList.sort(sortByStatusAsc);
-    update();
-}
-function sortByStatusAsc(product1, product2) {
-    if (product1.status < product2.status) return -1;
-    else if (product1.status === product2.status) return 0;
-    else return 1;
+        for (let i = 0; i < products.length; i++) {
+            productList.push({
+                id: products[i].id,
+                description: products[i].description,
+                date: products[i].date,
+                cost: products[i].cost,
+                icon: products[i].icon,
+            });
+        }
+        update();
+    });
 }
 
-function sortByStatusDesc(delivery1, delivery2) {
-    return -sortByStatusAsc(delivery1, delivery2);
+function fromServer(error, data) {
+    if (!error){
+        LiqPayCheckout.init({
+            data:	data.data,
+            signature:	data.signature,
+            embedTo:	"#liqpay",
+            mode:	"popup"	//	embed	||	popup
+        }).on("liqpay.callback",	function(data){
+            console.log(data.status);
+            console.log(data);
+        }).on("liqpay.ready",	function(data){
+//	ready
+        }).on("liqpay.close",	function(data){
+//	close
+        });
+    }
 }
+
+$('#buyProducts').click(function (){
+    console.log('hello');
+    let sum = $("#totalSum").text();
+    let order = {
+        amount: sum,
+        description: "Cool math stuff"
+    };
+    API.createPayment(order, fromServer);
+});
 
 function update () {
     $products.html("");
@@ -1043,7 +1064,7 @@ function update () {
         let $node = $(html_code);
 
         $node.find('.buyProduct').click(function () {
-            PizzaCart.addToCart(product);
+            ProductCart.addToCart(product);
         });
         $products.append($node);
         }
@@ -1059,7 +1080,7 @@ let $modal = $('#myModal');
 // When the user clicks on the button, open the modal
 $('#basket').click(function () {
    $modal.css('display','block');
-   PizzaCart.showProductInCart();
+   ProductCart.showProductInCart();
 });
 
 
@@ -1078,7 +1099,7 @@ window.onclick = function(event) {
 }
 
 exports.initializeProducts = initializeProducts;
-},{"../productCart/Cart":9,"../shop/products":11,"../viewDeliveries/delTemp":15}],13:[function(require,module,exports){
+},{"../API":1,"../productCart/Cart":9,"../shop/products":11,"../viewDeliveries/delTemp":15}],13:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -1644,7 +1665,7 @@ const ejs = require('ejs');
 
 exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=description%>\"><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=date%>\"><span><%=date%></span></div>\r\n        <div class = 'item-cost' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=cost%>₴\"><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
 
-exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=product.fullStatus%>\">Status: <%=product.status%></span>\r\n    <button class=\"buyProduct\">Buy</button>\r\n</div>");
+exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"buyProduct\">Buy</button>\r\n</div>");
 
 exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n</div>");
 },{"ejs":19}],16:[function(require,module,exports){

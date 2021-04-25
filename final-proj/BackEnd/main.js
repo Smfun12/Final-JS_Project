@@ -35,6 +35,8 @@ function configureEndpoints(app) {
     // Сторінка міні-маґазину
     app.get('/shop.html', pages.shopPage);
 
+    app.post('/api/get-products/', api.getProducts);
+
     // Сторінка міні-маґазину
     app.get('/payment.html', pages.paymentPage);
 

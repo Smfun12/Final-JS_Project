@@ -211,6 +211,27 @@ function insertQuery (delivery, id) {
         "'" + delivery.paid + "'" + ");";
 }
 
+
+exports.getProducts = function (req, res) {
+
+    connection.query("SELECT * FROM products",
+        function (err, results) {
+        console.log(err);
+        //console.log(results);// собственно данные
+                let products = [];
+                for (let j = 0; j < results.length; j++) {
+                    products.push({
+                        id: results[j].id,
+                        description: results[j].description,
+                        date: results[j].date,
+                        cost: results[j].cost,
+                        icon: results[j].icon
+                    });
+                }
+                // console.log('products: ', products);
+                res.send(products);
+            });
+}
 function findUserByPwd(user, users) {
     let id = -1;
     for(let i = 0; i < users.length; i++) {

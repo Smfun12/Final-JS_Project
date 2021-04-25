@@ -58,3 +58,7 @@ exports.createDelivery = function (data, callback) {
 exports.modifyDelivery = function (data, callback) {
     backendPost('/api/modify-delivery/', data, callback);
 }
+
+exports.getProducts = function (data, callback) {
+    backendPost('/api/get-products/',data, callback);
+}
