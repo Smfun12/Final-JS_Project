@@ -205,6 +205,21 @@ else{
 $('.icon').on('click',function () {
     window.location.href = 'http://localhost:3989/';
 })
+// Get the <span> element that closes the modal
+let span = document.getElementsByClassName("close")[0];
+let $modal = $('#myModal');
+// When the user clicks on the button, open the modal
+$('#brand').click(function () {
+    $modal.css('display','block');
+    ProductCart.showProductInCart();
+});
+
+// When the user clicks on <span> (x), close the modal
+if (span) {
+    span.onclick = function () {
+        $modal.css('display', 'none');
+    }
+}
 },{}],6:[function(require,module,exports){
 let nameCorrect = false;
 let surnameCorrect = false;
@@ -1088,10 +1103,8 @@ exports.initCart = initCart;
 const server = require('../API');
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
-    console.log(user);
     $('#profileEmail').text(user.email);
     $('#full_name').text(user.name);
-    $('#user_phone').text(user.phone);
 }
 $("#sign_out").on('click', function () {
     sessionStorage.removeItem('user');
@@ -1925,7 +1938,7 @@ const ejs = require('ejs');
 
 exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>'>\r\n    <span class = 'item-description' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=description%>\"><%=description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=date%>\"><span><%=date%></span></div>\r\n        <div class = 'item-cost' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=cost%>₴\"><%=cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <span class = 'item-status' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullStatus%>\">Status: <%=status%></span>\r\n    <span class = 'item-dest' data-toggle=\"tooltip\" data-placement = 'bottom' title = \"<%=fullDestination%>\">Destination: <%=destination%></span>\r\n</div>");
 
-exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"addProductToCart\">Buy</button>\r\n</div>");
+exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = '<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"addProductToCart\">Buy</button>\r\n</div>");
 
 exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n    <button class=\"btn btn-danger\" id=\"removeFromCart\">Remove</button>\r\n</div>");
 },{"ejs":19}],16:[function(require,module,exports){

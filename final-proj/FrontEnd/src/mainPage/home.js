@@ -38,3 +38,18 @@ else{
 $('.icon').on('click',function () {
     window.location.href = 'http://localhost:3989/';
 })
+// Get the <span> element that closes the modal
+let span = document.getElementsByClassName("close")[0];
+let $modal = $('#myModal');
+// When the user clicks on the button, open the modal
+$('#brand').click(function () {
+    $modal.css('display','block');
+    ProductCart.showProductInCart();
+});
+
+// When the user clicks on <span> (x), close the modal
+if (span) {
+    span.onclick = function () {
+        $modal.css('display', 'none');
+    }
+}
