@@ -66,3 +66,6 @@ exports.checkUserByEmail = function (data, callback) {
 exports.modifyUser = function (data, callback) {
     backendPost('/api/modify-user', data, callback);
 }
+exports.getProducts = function (data, callback) {
+    backendPost('/api/get-products/',data, callback);
+}

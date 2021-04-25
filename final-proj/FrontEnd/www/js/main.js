@@ -60,6 +60,13 @@ exports.modifyDelivery = function (data, callback) {
     backendPost('/api/modify-delivery/', data, callback);
 }
 
+exports.checkUserByEmail = function (data, callback) {
+    backendPost('/resetPwd.html', data, callback);
+}
+
+exports.modifyUser = function (data, callback) {
+    backendPost('/api/modify-user', data, callback);
+}
 exports.getProducts = function (data, callback) {
     backendPost('/api/get-products/',data, callback);
 }
@@ -72,7 +79,7 @@ exports.get = function (key) {
 exports.set = function (key, value) {
     return basil.set(key, value);
 };
-},{"basil.js":16}],3:[function(require,module,exports){
+},{"basil.js":17}],3:[function(require,module,exports){
 let API =require('../API');
 
 function parseEmail(email) {
@@ -128,6 +135,8 @@ $('#sendUserData').on('click', function () {
     console.log(user_data);
     API.checkUserInSystem(user_data, sendToBack);
 });
+
+exports.parsePwd = parsePwd;
 },{"../API":1}],4:[function(require,module,exports){
 $(function () {
     let homePage = require('./mainPage/home');
@@ -138,6 +147,8 @@ $(function () {
     let orderPage = require('./orderPage/order');
     let payPage = require('./payments/payments');
     let orderParamPage = require('./ordrParamPage/orderParamMain');
+
+    let resetPwdPage = require('./resetPwd/resetPwd');
 
     let shopPage = require('./shop/shop');
     let productCart = require('./productCart/Cart');
@@ -153,7 +164,7 @@ $(function () {
     orderParamPage.showGif();
     profilePage.loadProfile();
 });
-},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./shop/shop":11,"./signUp/forSignUp":12,"./viewDeliveries/archive":13}],5:[function(require,module,exports){
+},{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./resetPwd/resetPwd":11,"./shop/shop":12,"./signUp/forSignUp":13,"./viewDeliveries/archive":14}],5:[function(require,module,exports){
 $('#my-dels').click(function () {
     window.location.href = 'http://localhost:3989/archive.html';
 });
@@ -979,7 +990,7 @@ function update () {
 }
 
 exports.initializePayments = initializePayments;
-},{"../API":1,"../viewDeliveries/delTemp":14}],9:[function(require,module,exports){
+},{"../API":1,"../viewDeliveries/delTemp":15}],9:[function(require,module,exports){
 let templates = require('../viewDeliveries/delTemp');
 let storage = require('../localStorage');
 let Cart = []
@@ -1079,7 +1090,7 @@ exports.getCart = getCart;
 exports.setCart = setCart;
 exports.initCart = initCart;
 
-},{"../localStorage":2,"../shop/shop":11,"../viewDeliveries/delTemp":14}],10:[function(require,module,exports){
+},{"../localStorage":2,"../shop/shop":12,"../viewDeliveries/delTemp":15}],10:[function(require,module,exports){
 const server = require('../API');
 let user = JSON.parse(sessionStorage.getItem('user'));
 if (user) {
@@ -1121,6 +1132,77 @@ function loadProfile() {
 exports.loadProfile = loadProfile;
 
 },{"../API":1}],11:[function(require,module,exports){
+const server = require('../API');
+const mailSender = require('../signUp/forSignUp');
+const login = require('../login/login');
+
+let code = 1000;
+let emailAddress;
+
+$('#main-reset-btn').on('click', function () {
+    if ($('#new-password').css('display') === 'none') {
+        let email = {
+            email: $('#email').val()
+        };
+        emailAddress = email.email;
+        // console.log(email);
+        server.checkUserByEmail(email, function (err, data) {
+            if (err) {
+                console.log(err.toString());
+                return;
+            }
+            if (!data) {
+                console.log('Bad data');
+                return;
+            }
+            if (data === 'false') {
+                $('#notFound').css({'height': '100px', 'opacity': '1'});
+            } else {
+                $('#notFound').css({'height': '0px', 'opacity': '0'});
+                $('#ver-code-label').css('display', 'block');
+                $('#verification-code').css('display', 'block');
+                code = mailSender.sendMail('User', 'of our website', email.email);
+                //console.log("Code: ", code);
+            }
+        });
+    } else {
+        let password = $('#new-password').val();
+        if (!login.parsePwd(password)) {
+            //console.log('bad pwd');
+            $('#invalid-password').css('display', 'inline');
+            return;
+        } else {
+            server.modifyUser({
+                email: emailAddress,
+                password: password
+            }, function (err, data) {
+                sessionStorage.setItem('user',JSON.stringify(data));
+                console.log(sessionStorage.getItem('user'));
+                server.homePage(function (error, data) {
+                    if (!error){
+                        console.log(data);
+                        window.location.href="http://localhost:3989";
+                    }
+                });
+            });
+        }
+    }
+});
+
+$('#verification-code').on('input', function () {
+    let entryCode = Number.parseInt($(this).val());
+    if (entryCode < 1000 || entryCode > 9999) return;
+    if (entryCode === code) {
+        $('#bad-code').css('display', 'none');
+        $('#ver-code-label').css('display', 'none');
+        $(this).css('display', 'none');
+        $('#new-password-label').css('display', 'block');
+        $('#new-password').css('display', 'block');
+    } else {
+        $('#bad-code').css('display', 'block');
+    }
+});
+},{"../API":1,"../login/login":3,"../signUp/forSignUp":13}],12:[function(require,module,exports){
 let $products = $('#products');
 let storage = require('../localStorage');
 const templates = require('../viewDeliveries/delTemp');
@@ -1280,7 +1362,7 @@ if (span) {
 
 exports.initializeProducts = initializeProducts;
 exports.updateShop = updateShop;
-},{"../API":1,"../localStorage":2,"../productCart/Cart":9,"../viewDeliveries/delTemp":14}],12:[function(require,module,exports){
+},{"../API":1,"../localStorage":2,"../productCart/Cart":9,"../viewDeliveries/delTemp":15}],13:[function(require,module,exports){
 let firstname;
 let lastname;
 let address;
@@ -1289,14 +1371,13 @@ let codeResent = 0;
 
 let API = require('../API');
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-    //max & min inclusive
-}
-
 function sendMail(name, surname, email) {
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+        //max & min inclusive
+    }
     const code = getRandomInt(1000, 9999);
     Email.send({
         Host: "smtp.gmail.com",
@@ -1311,7 +1392,7 @@ function sendMail(name, surname, email) {
                 + code,
     })
         .then(function (message) {
-            //alert("mail sent successfully")
+            // alert("mail sent successfully")
         });
     return code;
 }
@@ -1448,7 +1529,8 @@ function parsePwd(password){
     return re.test(password);
 }
 
-},{"../API":1}],13:[function(require,module,exports){
+exports.sendMail = sendMail;
+},{"../API":1}],14:[function(require,module,exports){
 const templates = require('./delTemp');
 const deliveriesList = require('./deliveriesList');
 const serverInteract = require('../API');
@@ -1841,7 +1923,7 @@ $('#delivery-info').on('hide.bs.modal', function () {
 $('[data-toggle="tooltip"]').tooltip();
 
 exports.initializeArchive = initializeArchive;
-},{"../API":1,"./delTemp":14,"./deliveriesList":15}],14:[function(require,module,exports){
+},{"../API":1,"./delTemp":15,"./deliveriesList":16}],15:[function(require,module,exports){
 
 const ejs = require('ejs');
 
@@ -1850,7 +1932,7 @@ exports.deliveryItem = ejs.compile("<div class = 'del-list' id = 'item<%=numId%>
 exports.shopIitem = ejs.compile("<div class = 'col-sm-12 col-md-6 col-lg-4 col-xl-4 card product-list' id = 'item<%=product.id%>'>\r\n    <img src=\"<%=product.icon%>\" alt=\"\">\r\n    <span class = 'item-description'><%=product.description%></span>\r\n    <div class = 'right-side'>\r\n        <div class = 'item-date'><span><%=product.date%></span></div>\r\n        <div class = 'item-cost'><%=product.cost%>₴</div>\r\n    </div>\r\n    <br>\r\n    <button class=\"addProductToCart\">Buy</button>\r\n</div>");
 
 exports.cartItem = ejs.compile("<div id = 'item<%=product.product.id%>'>\r\n    <img src=\"<%= product.product.icon%>\" alt=\"\" class=\"imageInCart\">\r\n    <br>\r\n    <span class = 'item-description'><%=product.product.description%></span>\r\n    <br>\r\n    <span class = 'item-cost'><%=product.product.cost%>₴</span>\r\n    <br>\r\n    <span class=\"product-quantity\">Quantity: <%= product.quantity%></span>\r\n    <button class=\"btn btn-danger\" id=\"removeFromCart\">Remove</button>\r\n</div>");
-},{"ejs":18}],15:[function(require,module,exports){
+},{"ejs":19}],16:[function(require,module,exports){
 function getDeliveries() {
     let deliveries = [
         {
@@ -1900,7 +1982,7 @@ function getDeliveries() {
 }
 
 exports.getDeliveries = getDeliveries;
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function () {
 	// Basil
 	var Basil = function (options) {
@@ -2305,9 +2387,9 @@ exports.getDeliveries = getDeliveries;
 
 })();
 
-},{}],17:[function(require,module,exports){
-
 },{}],18:[function(require,module,exports){
+
+},{}],19:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -3248,7 +3330,7 @@ if (typeof window != 'undefined') {
   window.ejs = exports;
 }
 
-},{"../package.json":20,"./utils":19,"fs":17,"path":21}],19:[function(require,module,exports){
+},{"../package.json":21,"./utils":20,"fs":18,"path":22}],20:[function(require,module,exports){
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -3429,7 +3511,7 @@ exports.hyphenToCamel = function (str) {
   return str.replace(/-[a-z]/g, function (match) { return match[1].toUpperCase(); });
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports={
   "_from": "ejs@^3.1.6",
   "_id": "ejs@3.1.6",
@@ -3505,7 +3587,7 @@ module.exports={
   "version": "3.1.6"
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -4038,7 +4120,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":22}],22:[function(require,module,exports){
+},{"_process":23}],23:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
