@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     database: "js_project",
-    password: "root",
+    password: "Bydandyld03/29",
     timezone: "local"
 });
 
