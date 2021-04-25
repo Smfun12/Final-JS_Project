@@ -6,7 +6,7 @@ CREATE TABLE `deliveries` (
   `phone` varchar(20) DEFAULT NULL,
   `destination` varchar(100) NOT NULL,
   `description` varchar(200) DEFAULT NULL,
-  `date` date DEFAULT NULL,
+  `date` varchar(20) DEFAULT NULL,
   `cost` int NOT NULL,
   `status` varchar(45) DEFAULT NULL,
   `payer` varchar(45) NOT NULL,
@@ -14,4 +14,4 @@ CREATE TABLE `deliveries` (
   PRIMARY KEY (`id`),
   KEY `user_id_idx` (`user_id`),
   CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+)
