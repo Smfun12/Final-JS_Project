@@ -206,8 +206,8 @@ $('.icon').on('click',function () {
     window.location.href = 'http://localhost:3989/';
 })
 // Get the <span> element that closes the modal
-let span = document.getElementsByClassName("close")[0];
-let $modal = $('#myModal');
+let span = document.getElementsByClassName("modalIcon")[0];
+let $modal = $('.modalBox');
 // When the user clicks on the button, open the modal
 $('#brand').click(function () {
     $modal.css('display','block');

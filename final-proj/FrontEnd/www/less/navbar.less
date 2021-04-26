@@ -1,6 +1,7 @@
 @height: 70px;
 
 .navbar{
+  justify-content: normal;
 }
 
 #brand {
@@ -13,9 +14,7 @@
   transform: rotate(360deg);
 }
 
-
 #profile{
-  float: right;
   height: 50px;
   width: 50px;
   cursor: pointer;
@@ -92,11 +91,10 @@
     display: none;
   }
 }
-.modal {
+.modalBox {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
@@ -107,29 +105,45 @@
 }
 
 /* Modal Content */
-.modal-content {
+.modal-wrap {
   position: relative;
+  top: 200px;
   background-color: #fefefe;
   margin: auto;
   padding: 0;
   border: 1px solid #888;
+  border-radius: 20px;
   width: 80%;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
   -webkit-animation-name: animatetop;
   -webkit-animation-duration: 0.4s;
   animation-name: animatetop;
-  animation-duration: 0.4s
+  animation-duration: 0.4s;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-wrap b{
+  padding: 20px 35px 0;
+}
+
+.modal-wrap p{
+  padding: 20px 25px 0;
+}
+
+.modal-wrap small{
+  padding: 20px 25px 0;
 }
 
 /* Add Animation */
 @-webkit-keyframes animatetop {
-  from {top:-300px; opacity:0}
-  to {top:0; opacity:1}
+  from {top:0px; opacity:0}
+  to {top:200px; opacity:1}
 }
 
 @keyframes animatetop {
-  from {top:-300px; opacity:0}
-  to {top:0; opacity:1}
+  from {top:0px; opacity:0}
+  to {top:200px; opacity:1}
 }
 
 /* The Close Button */
@@ -154,3 +168,11 @@
 }
 
 .modal-body {padding: 2px 16px;}
+
+.closeModal{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+  top: 15%;
+}
