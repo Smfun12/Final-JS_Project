@@ -122,7 +122,6 @@ $('#sendUserData').on('click', function () {
     let password = $('#password').val();
     if (!parseEmail(email) || !parsePwd(password)) {
         $('#error').css({'height':'100px','opacity':'1'});
-        $('#notFound').css({'height':'100px','opacity':'0'});
         return;
     }
     else{
