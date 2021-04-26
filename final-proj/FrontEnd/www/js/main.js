@@ -165,7 +165,12 @@ $(function () {
 });
 },{"./login/login":3,"./mainPage/home":5,"./orderPage/order":6,"./ordrParamPage/orderParamMain":7,"./payments/payments":8,"./productCart/Cart":9,"./profile/profile":10,"./resetPwd/resetPwd":11,"./shop/shop":12,"./signUp/forSignUp":13,"./viewDeliveries/archive":14}],5:[function(require,module,exports){
 $('#my-dels').click(function () {
-    window.location.href = 'http://localhost:3989/archive.html';
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/archive.html';
+    }
 });
 
 $('#new-del').click(function () {

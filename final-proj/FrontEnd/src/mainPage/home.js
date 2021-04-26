@@ -1,5 +1,10 @@
 $('#my-dels').click(function () {
-    window.location.href = 'http://localhost:3989/archive.html';
+    if (sessionStorage.getItem('user') === null) {
+        window.location.href = 'http://localhost:3989/signup.html';
+    }
+    else {
+        window.location.href = 'http://localhost:3989/archive.html';
+    }
 });
 
 $('#new-del').click(function () {
