@@ -1,4 +1,4 @@
-<div id = 'item<%=product.product.id%>'>
+<div id = 'item<%=product.product.id%>' class="productInCart">
     <img src="<%= product.product.icon%>" alt="" class="imageInCart">
     <br>
     <span class = 'item-description'><%=product.product.description%></span>
@@ -6,5 +6,6 @@
     <span class = 'item-cost'><%=product.product.cost%>₴</span>
     <br>
     <span class="product-quantity">Quantity: <%= product.quantity%></span>
+    <br>
     <button class="btn btn-danger" id="removeFromCart">Remove</button>
 </div>

@@ -10,22 +10,14 @@
 </head>
 <body>
 <%- include('common/navbar'); -%>
-<video autoplay muted loop id="myVideo">
-    <source src="./videos/shopVideo.mp4" type="video/mp4">
-    Your browser does not support HTML5 video.
-</video>
-
 <div id="myModal" class="modal">
 
     <!-- Modal content -->
     <div class="modal-content">
         <div class="modal-header">
             <span class="close">&times;</span>
-            <h2>Modal Header</h2>
         </div>
         <div class="modal-body">
-        </div>
-        <div style="text-align: right"><img src="./images/tesseract.gif" alt="" id="hypercube">
         </div>
         <div class="modal-footer">
             <h3>Total sum:</h3>
@@ -37,8 +29,10 @@
 
 </div>
 <div class="sorting">
-    <button class="btn btn-warning" id="price">Price</button>
-    <button class="btn btn-warning" id="description">Description</button>
+    <button class="sort" id="price" style="outline: none">Price</button>
+    <button class="sort" id="description" style="outline: none">Description</button>
 </div>
-<div class="row" id = "products"></div>
+<div class="container">
+<div class="row " id = "products"></div>
+</div>
 <%- include('common/footer'); -%>
