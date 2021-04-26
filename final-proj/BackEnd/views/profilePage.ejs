@@ -20,19 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js"></script>
 </head>
 <body>
-<nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="http://localhost:3989">
-        <img src="./images/brand.jpg" id = "brand" alt="">
-    </a>
-    <div id = "nav-top"><span>Super quick delivery - we travel faster than sound!</span></div>
-    <div id = "nav-bottom"><span>Trouble? Call +380-395-5566-12!</span> <span id="to-hide">We are available at any time of the day!</span></div>
-
-    <img src = "./images/user.png" id = "profile">
-    <div class="icon icon-fill">
-        <img src="./images/home.jpg" id="home-icon" alt="">
-        <i class="fa fa-home"></i></div>
-
-</nav>
+<%- include('common/navbar'); -%>
 <div class="page-content page-container" id="page-content">
     <div class="padding">
         <div class="row justify-content-center d-flex ">
